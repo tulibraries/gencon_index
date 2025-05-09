@@ -1,0 +1,5 @@
+# vim swap files and data directory
+
+*.sw[p-z]
+
+csv/
