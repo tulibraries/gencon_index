@@ -5,7 +5,7 @@ require_relative "lib/harvest_csv"
 
 Dotenv.load
 
-files = Dir["/tmp/gencon/*.csv"]
+files = Dir["#{ENV['GENCON_TEMP_PATH']}"].join("/")
 files.sort.each do |fn|
   fp = File.expand_path(fn)
   puts "process #{fp}"
