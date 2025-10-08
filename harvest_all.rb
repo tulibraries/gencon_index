@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require 'dotenv/load'
+require "dotenv/load"
 require_relative "lib/harvest_csv"
 
 Dotenv.load
@@ -14,8 +15,8 @@ files.sort.each do |fn|
     "harvest",
     "'#{fp}'",
     "--mapfile=./solr_map.yml",
-    "--solr-url=#{ENV['SOLR_URL']}"].join(" ")
+    "--solr-url=#{ENV.fetch('SOLR_URL', nil)}"
+  ].join(" ")
   puts command
   `#{command}`
 end
-

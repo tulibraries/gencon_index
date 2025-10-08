@@ -11,16 +11,17 @@ gem "uri", "~> 1.0", ">= 1.0.3"
 gem "logger", "~> 1.6", ">= 1.6.6"
 gem "thor", "~> 1.3", ">= 1.3.2"
 gem "activesupport"
-
-group :test do
-  # Adds support for Capybara system testing and selenium driver
-  gem "rspec"
-end
+gem "csv", "~> 3.3"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
+  gem "byebug", platforms: %i[mri mingw x64_mingw]
   gem "solr_wrapper", ">= 4.0.2"
   gem "pry"
   gem "rubocop", require: false
+end
+
+group :test do
+  gem "factory_bot", "~> 6.4"
+  gem "rspec", "~> 3.13"
 end
