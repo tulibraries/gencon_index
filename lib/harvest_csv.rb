@@ -59,7 +59,7 @@ module HarvestCSV
       batch_thread << Thread.new do
         document_batch = []
         batch.each do |item|
-          document_batch << (csv_to_solr(item.to_h, schema_map))
+          document_batch << csv_to_solr(item.to_h, schema_map)
           progressbar.increment
         end
         solr.add document_batch, add_attributes: { commitWithin: 10 }
