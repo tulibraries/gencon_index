@@ -21,7 +21,7 @@ Bundler/OrderedGems:
 
 Metrics/BlockLength:
   Exclude:
-    - spec/**
+    - spec/**/*
 
 Metrics/MethodLength:
   Max: 25
