@@ -5,7 +5,7 @@ AllCops:
   SuggestExtensions: false
   Exclude:
     - bin/**
-    - vendor/**
+    - '**/vendor/**/*'
 
 Style/Documentation:
   Enabled: false
