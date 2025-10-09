@@ -2,13 +2,10 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.3
   UseCache: false
-  Exclude:
-    - bin/*
-    - vendor/**/*
   SuggestExtensions: false
-
-Layout/LineLength:
-  Max: 120
+  Exclude:
+    - bin/**
+    - '**/vendor/**/*'
 
 Style/Documentation:
   Enabled: false
@@ -16,10 +13,10 @@ Style/Documentation:
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
-Bundler/OrderedGems:
+Style/WordArray:
   Enabled: false
 
-Style/WordArray:
+Bundler/OrderedGems:
   Enabled: false
 
 Metrics/BlockLength:
