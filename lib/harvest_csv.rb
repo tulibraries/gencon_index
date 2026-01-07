@@ -11,6 +11,7 @@ require 'logger'
 require 'active_support'
 require 'active_support/core_ext/string/inflections'
 
+# Utility methods for CSV-to-Solr mapping and helper generation.
 module HarvestCSV
   def self.csv_to_solr(csv_hash, schema_map)
     document = {}
@@ -108,10 +109,12 @@ module HarvestCSV
     partial_file = partial_output.respond_to?(:write) ? partial_output : File.new(partial_output, 'w')
     line = String.new
     get_blacklight_add_fields(schema_map, 'facet').each do |f|
-      line << "    config.add_facet_field '#{f[:field]}', label: '#{f[:label]}'\n"
+      line << format("    config.add_facet_field '%<field>s', label: '%<label>s'\n",
+                     field: f[:field], label: f[:label])
     end
     get_blacklight_add_fields(schema_map, 'display').each do |f|
-      line << "    config.add_show_field '#{f[:field]}', label: '#{f[:label]}'\n"
+      line << format("    config.add_show_field '%<field>s', label: '%<label>s'\n",
+                     field: f[:field], label: f[:label])
     end
     partial_file.write line
     partial_file.close unless partial_output.respond_to?(:write)
