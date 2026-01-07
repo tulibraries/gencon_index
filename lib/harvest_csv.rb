@@ -9,6 +9,7 @@ require 'ruby-progressbar'
 require 'uri'
 require 'logger'
 
+# Utility methods for CSV-to-Solr mapping and helper generation.
 module HarvestCSV
   def self.csv_to_solr(csv_hash, schema_map)
     document = {}
@@ -39,7 +40,7 @@ module HarvestCSV
 
   def self.harvest(csv_source,
                    map_source = 'solr_map.yml',
-                   solr_endpoint = ENV['SOLR_URL'],
+                   solr_endpoint = ENV.fetch('SOLR_URL', nil),
                    batch_size = 100)
     logger = Logger.new($stdout)
     logger.info("Batch size = #{batch_size}")
@@ -106,12 +107,12 @@ module HarvestCSV
     partial_file = File.new(partial_output, 'w')
     line = ''
     get_blacklight_add_fields(schema_map, 'facet').each do |f|
-      line << format("    config.add_facet_field '%s', label: '%s'\n",
-                     f[:field], f[:label])
+      line << format("    config.add_facet_field '%<field>s', label: '%<label>s'\n",
+                     field: f[:field], label: f[:label])
     end
     get_blacklight_add_fields(schema_map, 'display').each do |f|
-      line << format("    config.add_show_field '%s', label: '%s'\n",
-                     f[:field], f[:label])
+      line << format("    config.add_show_field '%<field>s', label: '%<label>s'\n",
+                     field: f[:field], label: f[:label])
     end
     partial_file.write line
   end

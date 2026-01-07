@@ -15,7 +15,7 @@ files.sort.each do |fn|
     'harvest',
     "'#{fp}'",
     '--mapfile=./solr_map.yml',
-    "--solr-url=#{ENV['SOLR_URL']}"
+    "--solr-url=#{ENV.fetch('SOLR_URL', nil)}"
   ].join(' ')
   puts command
   `#{command}`
