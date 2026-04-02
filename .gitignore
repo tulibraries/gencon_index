@@ -3,3 +3,4 @@
 *.sw[p-z]
 
 csv/
+coverage/
