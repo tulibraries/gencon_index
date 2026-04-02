@@ -1,11 +1,23 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
+require "simplecov"
+require "simplecov-lcov"
 require "active_support"
 require "active_support/core_ext/string/inflections"
 require "fileutils"
 require "pathname"
 require "factory_bot"
+
+SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
+SimpleCov.formatters = SimpleCov::Formatter::MultiFormatter.new([
+                                                                  SimpleCov::Formatter::HTMLFormatter,
+                                                                  SimpleCov::Formatter::LcovFormatter
+                                                                ])
+SimpleCov.coverage_dir("coverage")
+SimpleCov.start do
+  add_filter "/spec/"
+end
 
 SPEC_ROOT = Pathname.new(__dir__)
 SPEC_TMP_DIR = SPEC_ROOT.join("tmp")
