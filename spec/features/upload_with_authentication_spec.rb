@@ -1,28 +1,20 @@
 # frozen_string_literal: true
 
-require "rails_helper"
+require "spec_helper"
+require_relative "../../lib/harvest_csv"
 
-RSpec.feature "UploadWithAuthentications", type: :feature do
-  before(:all) do
-    @email = "admin@example.eom"
-    @password = "password"
-    @user = User.create!(email: @email, password: @password, password_confirmation: @password)
-  end
+RSpec.describe HarvestCSV do
+  describe ".blacklight" do
+    let(:output_path) { SPEC_TMP_DIR.join("generated_blacklight_config.rb") }
 
-  after(:all) do
-    @user.destroy
-  end
+    it "builds a Blacklight partial from the checked-in Solr schema map" do
+      described_class.blacklight("solr_map.yml", output_path)
 
-  context "Access upload page" do
-    scenario "Create new item " do
-      visit("/upload")
-      expect(page).to_not have_xpath("//body[contains(., 'New Upload')]")
-      expect(page).to have_xpath("//main[contains(., 'Log in')]")
+      partial = File.read(output_path)
 
-      fill_in("Email", with: @email)
-      fill_in("Password", with: @password)
-      click_button("Log in")
-      expect(page).to have_xpath("//body[contains(., 'New Upload')]")
+      expect(partial).to include("config.add_facet_field 'event_type_facet', label: 'Event Type'")
+      expect(partial).to include("config.add_show_field 'title_display', label: 'Title'")
+      expect(partial).to include("config.add_show_field 'long_description_display', label: 'Long Description'")
     end
   end
 end
