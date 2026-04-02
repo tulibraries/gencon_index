@@ -1,0 +1,170 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://localhost:8090/solr/gencon50-1.0/select?f.event_type_facet.facet.limit=11&f.event_type_facet.facet.mincount=1&f.event_type_facet.facet.sort=count&f.game_system_facet.facet.limit=11&f.game_system_facet.facet.mincount=1&f.game_system_facet.facet.sort=count&f.group_facet.facet.limit=11&f.group_facet.facet.mincount=1&f.group_facet.facet.sort=count&f.year_facet.facet.limit=-1&f.year_facet.facet.mincount=1&f.year_facet.facet.sort=index&facet=true&facet.field=game_system_facet&fl=id,%0A%20%20%20%20%20%20%20%20%20%20%20score,%0A%20%20%20%20%20%20%20%20%20%20%20year_display,%0A%20%20%20%20%20%20%20%20%20%20%20title_display,%0A%20%20%20%20%20%20%20%20%20%20%20short_description_display,%0A%20%20%20%20%20%20%20%20%20%20%20long_description_display&pf=game_system_t&q=Dungeons%20%26%20Dragons&qf=game_system_t&rows=10&sort=score%20desc,%20year_sort%20desc,%20title_sort%20asc&wt=json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.7.4
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Last-Modified:
+      - Mon, 13 Mar 2023 22:39:17 GMT
+      Etag:
+      - '"MzIyMDAwMDAwMDAwMDAwMFNvbHI="'
+      Content-Type:
+      - application/json;charset=utf-8
+      Content-Length:
+      - '8620'
+    body:
+      encoding: UTF-8
+      string: |
+        {
+          "responseHeader":{
+            "status":0,
+            "QTime":2,
+            "params":{
+              "f.event_type_facet.facet.limit":"11",
+              "f.group_facet.facet.sort":"count",
+              "facet.field":["year_facet",
+                "group_facet",
+                "event_type_facet",
+                "game_system_facet"],
+              "f.group_facet.facet.mincount":"1",
+              "fl":"id,\n           score,\n           year_display,\n           title_display,\n           short_description_display,\n           long_description_display",
+              "f.group_facet.facet.limit":"11",
+              "f.game_system_facet.facet.limit":"11",
+              "f.year_facet.facet.limit":"-1",
+              "sort":"score desc, year_sort desc, title_sort asc",
+              "rows":"10",
+              "f.event_type_facet.facet.sort":"count",
+              "f.event_type_facet.facet.mincount":"1",
+              "f.year_facet.facet.mincount":"1",
+              "q":"Dungeons & Dragons",
+              "f.game_system_facet.facet.sort":"count",
+              "f.game_system_facet.facet.mincount":"1",
+              "qf":"game_system_t",
+              "pf":"game_system_t",
+              "facet":"true",
+              "wt":"json",
+              "f.year_facet.facet.sort":"index"}},
+          "response":{"numFound":613,"start":0,"maxScore":11.935431,"docs":[
+              {
+                "year_display":["2012"],
+                "id":"2012-RPG1231412",
+                "title_display":["8 lost kingdom Horror Dungeon Krall: Act 1 Golbin Part 1 Missing sheep"],
+                "short_description_display":["You will try and survive. The ECL is up to 5 levels above the party. It is mostly a classic Arthurian world, but there are Asian elements. "],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPG1230566",
+                "title_display":["A Twist in Time - Chapter 4-We are off to save the Princess, the wonderful Princess of...."],
+                "short_description_display":["Roun czar on your side, Done! Roun Army to open 2nd front, Done! Protect the Princess, well 2 out of three is not really that bad. Nazi fighting aside, it is time to save the Princess."],
+                "long_description_display":["Roun czar on your side, Done! Roun Army to open second front, Done!, Protect the Princess, well 2 out of three is not really that bad....Who would have thought that when you signed up to fight the Nazis, you would end up in a different world, saving an honest to goodness, magic wielding Princess from blood thirsty pirates...makes dropping into occupied France 9 months ago seem easy now..."],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPG1230167",
+                "title_display":["All But Shipwrecked"],
+                "short_description_display":["You awaken on the shore of the underdark with no memories, and a simple mission before you. However, getting out unscathed with the prize will be much trickier than it seems... good luck!"],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPGA1235216",
+                "title_display":["AoA 5-1 - The Descent"],
+                "short_description_display":["You feel a call, drawing you toward the depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy?"],
+                "long_description_display":["You feel a call, drawing you toward the isolated depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy? Who else hears the call, and who or what is the caller?"],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPGA1235218",
+                "title_display":["AoA 5-1 - The Descent"],
+                "short_description_display":["You feel a call, drawing you toward the depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy?"],
+                "long_description_display":["You feel a call, drawing you toward the isolated depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy? Who else hears the call, and who or what is the caller?"],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPGA1235214",
+                "title_display":["AoA 5-1 - The Descent"],
+                "short_description_display":["You feel a call, drawing you toward the depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy?"],
+                "long_description_display":["You feel a call, drawing you toward the isolated depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy? Who else hears the call, and who or what is the caller?"],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPGA1235215",
+                "title_display":["AoA 5-1 - The Descent"],
+                "short_description_display":["You feel a call, drawing you toward the depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy?"],
+                "long_description_display":["You feel a call, drawing you toward the isolated depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy? Who else hears the call, and who or what is the caller?"],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPGA1235217",
+                "title_display":["AoA 5-1 - The Descent"],
+                "short_description_display":["You feel a call, drawing you toward the depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy?"],
+                "long_description_display":["You feel a call, drawing you toward the isolated depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy? Who else hears the call, and who or what is the caller?"],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPGA1235219",
+                "title_display":["AoA 5-1 - The Descent"],
+                "short_description_display":["You feel a call, drawing you toward the depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy?"],
+                "long_description_display":["You feel a call, drawing you toward the isolated depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy? Who else hears the call, and who or what is the caller?"],
+                "score":11.935431},
+              {
+                "year_display":["2012"],
+                "id":"2012-RPGA1235220",
+                "title_display":["AoA 5-1 - The Descent"],
+                "short_description_display":["You feel a call, drawing you toward the depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy?"],
+                "long_description_display":["You feel a call, drawing you toward the isolated depths of the Dragon's Bowl - where some say the Dragon first tore itself from the earth. Does it now contain your only hope to pay the Levy? Who else hears the call, and who or what is the caller?"],
+                "score":11.935431}]
+          },
+          "facet_counts":{
+            "facet_queries":{},
+            "facet_fields":{
+              "year_facet":[
+                "2002",272,
+                "2012",341],
+              "group_facet":[
+                "WIzards of the Coast",203,
+                "Game Base 7",36,
+                "BYOV",6,
+                "The Seekers",5,
+                "Infinite Imaginations, Inc.",4,
+                "Lynnvander Inc.",4,
+                "Reality Simulations, Inc.",4,
+                "The SuperiCore Group",4,
+                "Wolfcon",4,
+                "Darkness Remembered",3,
+                "InkPen Productions",3],
+              "event_type_facet":[
+                "Roleplaying Games",270,
+                "RPGA - Role Playing Gamers Association!",203,
+                "RPG - Role Playing Game",133,
+                "BGM - Board Game",4,
+                "Live Action Roleplaying Games",1,
+                "NMN - Non-Historical Miniatures",1,
+                "Non-Historical Miniatures",1],
+              "game_system_facet":[
+                "Dungeons & Dragons",425,
+                "Dungeons & Dragons, 3rd Edition",102,
+                "Advanced Dungeons & Dragons",81,
+                "Dungeons & Dragons Gamma World",4,
+                "Dungeons & Dragons Miniatures",1]},
+            "facet_ranges":{},
+            "facet_intervals":{},
+            "facet_heatmaps":{}},
+          "spellcheck":{
+            "suggestions":[],
+            "correctlySpelled":true}}
+  recorded_at: Mon, 13 Mar 2023 23:59:08 GMT
+recorded_with: VCR 6.1.0
