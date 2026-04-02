@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require 'rubygems'
-require 'csv'
-require 'rsolr'
-require 'yaml'
-require 'securerandom'
-require 'ruby-progressbar'
-require 'uri'
-require 'logger'
-require 'active_support'
-require 'active_support/core_ext/string/inflections'
+require "rubygems"
+require "csv"
+require "rsolr"
+require "yaml"
+require "securerandom"
+require "ruby-progressbar"
+require "uri"
+require "logger"
+require "active_support"
+require "active_support/core_ext/string/inflections"
 
 # Utility methods for CSV-to-Solr mapping and helper generation.
 module HarvestCSV
@@ -25,12 +25,12 @@ module HarvestCSV
     end
 
     # Gencon50 ID generation
-    document['id'] ||= document['original_order_display']
-    if document['id']
-      document['id'] = document['id'].dup
-      document['id'].prepend("#{document['year_display']}-") if document['year_display']
-      document['id'].delete!(',')
-      document['id'].delete!('#')
+    document["id"] ||= document["original_order_display"]
+    if document["id"]
+      document["id"] = document["id"].dup
+      document["id"].prepend("#{document['year_display']}-") if document["year_display"]
+      document["id"].delete!(",")
+      document["id"].delete!("#")
     end
 
     document
@@ -39,21 +39,21 @@ module HarvestCSV
   def self.sanitize(value)
     return value unless value.is_a?(String)
 
-    value.gsub(/[^[:print:]]/, '')
+    value.gsub(/[^[:print:]]/, "")
   end
 
   def self.harvest(csv_source,
-                   map_source = 'solr_map.yml',
-                   solr_endpoint = ENV.fetch('SOLR_URL', nil),
+                   map_source = "solr_map.yml",
+                   solr_endpoint = ENV.fetch("SOLR_URL", nil),
                    batch_size = 100)
     logger = Logger.new($stdout)
     logger.info("Batch size = #{batch_size}")
     schema_map = YAML.load_file(map_source)
     batch_thread = []
 
-    csv = CSV.read(csv_source, headers: true, encoding: 'utf-8')
+    csv = CSV.read(csv_source, headers: true, encoding: "utf-8")
 
-    progressbar = ProgressBar.create(title: 'Harvest ', total: csv.count, format: '%t (%c/%C) %a |%B|')
+    progressbar = ProgressBar.create(title: "Harvest ", total: csv.count, format: "%t (%c/%C) %a |%B|")
     solr = RSolr.connect url: solr_endpoint
     csv.each_slice(batch_size) do |batch|
       batch_thread << Thread.new do
@@ -81,12 +81,12 @@ module HarvestCSV
       csv.headers.each do |field_name|
         normalized_field = field_name.to_s.parameterize.underscore
         schema_map[normalized_field] = []
-        schema_map[normalized_field] << 'id' if target_id_field == normalized_field
+        schema_map[normalized_field] << "id" if target_id_field == normalized_field
         schema_map[normalized_field] << "#{normalized_field}_display"
         schema_map[normalized_field] << "#{normalized_field}_facet"
       end
     end
-    map_file = map_path.respond_to?(:write) ? map_path : File.new(map_path, 'w')
+    map_file = map_path.respond_to?(:write) ? map_path : File.new(map_path, "w")
     YAML.dump(schema_map, map_file)
     map_file.close unless map_path.respond_to?(:write)
   end
@@ -98,21 +98,21 @@ module HarvestCSV
 
       partial_fields << {
         field: a.parameterize,
-        label: a.sub(/_#{field_match}$/, '').titleize
+        label: a.sub(/_#{field_match}$/, "").titleize
       }
     end
     partial_fields
   end
 
-  def self.blacklight(map_source = 'solr_map.yml', partial_output = '_blacklight_config.rb')
+  def self.blacklight(map_source = "solr_map.yml", partial_output = "_blacklight_config.rb")
     schema_map = YAML.load_file(map_source)
-    partial_file = partial_output.respond_to?(:write) ? partial_output : File.new(partial_output, 'w')
+    partial_file = partial_output.respond_to?(:write) ? partial_output : File.new(partial_output, "w")
     line = String.new
-    get_blacklight_add_fields(schema_map, 'facet').each do |f|
+    get_blacklight_add_fields(schema_map, "facet").each do |f|
       line << format("    config.add_facet_field '%<field>s', label: '%<label>s'\n",
                      field: f[:field], label: f[:label])
     end
-    get_blacklight_add_fields(schema_map, 'display').each do |f|
+    get_blacklight_add_fields(schema_map, "display").each do |f|
       line << format("    config.add_show_field '%<field>s', label: '%<label>s'\n",
                      field: f[:field], label: f[:label])
     end
