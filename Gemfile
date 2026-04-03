@@ -24,4 +24,6 @@ end
 group :test do
   gem "factory_bot", "~> 6.4"
   gem "rspec", "~> 3.13"
+  gem "simplecov", require: false
+  gem "simplecov-lcov", require: false
 end

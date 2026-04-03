@@ -3,3 +3,5 @@
 *.sw[p-z]
 
 csv/
+coverage/
+spec/examples.txt

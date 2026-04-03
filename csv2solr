@@ -15,6 +15,7 @@ require "dotenv/load"
 require "thor"
 require_relative "lib/harvest_csv"
 
+# Command-line interface for harvesting CSV data into Solr and generating helpers.
 class CSV2Solr < Thor
   desc "harvest CSV_file", "Harvests CSV file Solr at an endpoint URL"
   option :mapfile,
@@ -54,4 +55,5 @@ class CSV2Solr < Thor
     HarvestCSV.blacklight(mapfile, options[:output])
   end
 end
+
 CSV2Solr.start(ARGV) if $PROGRAM_NAME == __FILE__
