@@ -1,0 +1,121 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "gli"
+require_relative "../lib/gencon_index"
+
+module GenconIndex
+  class App
+    extend GLI::App
+
+    program_desc "Wrapper CLI app for indexing Gen Con CSV data into Solr"
+
+    subcommand_option_handling :normal
+    arguments :strict
+
+    desc "Harvest a CSV file into the Solr endpoint"
+    arg_name "csv-file"
+    command :harvest do |c|
+      c.desc "CSV to Solr map file name"
+      c.flag [:mapfile], default_value: "solr_map.yml"
+
+      c.desc "Solr endpoint"
+      c.flag [:solr_url], default_value: ENV.fetch("SOLR_URL", nil)
+
+      c.desc "Number of records to send per batch"
+      c.flag [:batch_size], default_value: 100
+
+      c.action do |_global_options, options, args|
+        GenconIndex::CLI.harvest(
+          csv_file: args[0],
+          mapfile: options[:mapfile],
+          solr_url: options[:solr_url],
+          batch_size: options[:batch_size].to_i
+        )
+      end
+    end
+
+    desc "Harvest all matching CSV files from a directory"
+    command :harvest_all do |c|
+      c.desc "Directory containing CSV files"
+      c.flag [:directory], default_value: "/tmp/gencon"
+
+      c.desc "Glob pattern used to select files"
+      c.flag [:pattern], default_value: "*.csv"
+
+      c.desc "CSV to Solr map file name"
+      c.flag [:mapfile], default_value: "solr_map.yml"
+
+      c.desc "Solr endpoint"
+      c.flag [:solr_url], default_value: ENV.fetch("SOLR_URL", nil)
+
+      c.desc "Number of records to send per batch"
+      c.flag [:batch_size], default_value: 100
+
+      c.action do |_global_options, options, _args|
+        GenconIndex::CLI.harvest_all(
+          directory: options[:directory],
+          pattern: options[:pattern],
+          mapfile: options[:mapfile],
+          solr_url: options[:solr_url],
+          batch_size: options[:batch_size].to_i
+        )
+      end
+    end
+
+    desc "Create a Solr mapping file from a CSV header"
+    arg_name "csv-file"
+    command :makemap do |c|
+      c.desc "CSV column name with unique ID"
+      c.flag [:id], default_value: "ID"
+
+      c.desc "Output map file name"
+      c.flag [:map], default_value: "solr_map.yml"
+
+      c.action do |_global_options, options, args|
+        GenconIndex::CLI.makemap(
+          csv_file: args[0],
+          id: options[:id],
+          map: options[:map]
+        )
+      end
+    end
+
+    desc "Create a Blacklight config snippet from a map file"
+    arg_name "map-file"
+    command :blconfig do |c|
+      c.desc "Output Blacklight catalog controller snippet file"
+      c.flag [:output], default_value: "_blacklight_config.rb"
+
+      c.action do |_global_options, options, args|
+        GenconIndex::CLI.blconfig(
+          mapfile: args[0] || "solr_map.yml",
+          output: options[:output]
+        )
+      end
+    end
+
+    desc "Send a commit command to the Solr instance"
+    command :commit do |c|
+      c.desc "Solr endpoint"
+      c.flag [:solr_url], default_value: ENV.fetch("SOLR_URL", nil)
+
+      c.action do |_global_options, options, _args|
+        GenconIndex::CLI.commit(solr_url: options[:solr_url])
+      end
+    end
+
+    pre do |_global, _command, _options, _args|
+      true
+    end
+
+    post do |_global, _command, _options, _args|
+    end
+
+    on_error do |_exception|
+      true
+    end
+  end
+end
+
+exit GenconIndex::App.run(ARGV) if $PROGRAM_NAME == __FILE__

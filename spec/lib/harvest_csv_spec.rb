@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require_relative "../../lib/harvest_csv"
+require_relative "../../lib/gencon_index"
 
-RSpec.describe HarvestCSV do
+RSpec.describe GenconIndex::HarvestCSV do
   describe ".csv_to_solr" do
     let(:schema_map) { build(:schema_map) }
     let(:csv_row) { build(:csv_row_hash) }
