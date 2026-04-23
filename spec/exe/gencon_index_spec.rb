@@ -26,7 +26,8 @@ RSpec.describe GenconIndex::App do
         batch_size: 250
       )
 
-      run_command("harvest", "--mapfile=map.yml", "--solr-url=http://localhost:8983/solr", "--batch-size=250", "data.csv")
+      run_command("harvest", "--mapfile=map.yml", "--solr-url=http://localhost:8983/solr", "--batch-size=250",
+                  "data.csv")
     end
 
     it "dispatches the harvest_all command" do

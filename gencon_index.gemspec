@@ -32,4 +32,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rsolr", "~> 2.6"
   spec.add_dependency "ruby-progressbar", "~> 1.13"
   spec.add_dependency "yaml", "~> 0.4.0"
+  spec.metadata["rubygems_mfa_required"] = "true"
 end
