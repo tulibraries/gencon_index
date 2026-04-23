@@ -44,9 +44,29 @@ Ensure .env contains
     make up-lite
     cd ../gencon50
 
+Run the executable directly from the repo
+
+    bundle exec gencon_index help
+
 Ingest some data
 
-To seed the database with a csv file form the command line ,use the following command. Replace `path/to/datafile.csv`
+To seed the database with a CSV file from the command line, use the following command. Replace `path/to/datafile.csv`
 with the path to the file to upload.
 
-    bin/csv2solr harvest path/to/datafile.csv --mapfile=solr_map.yml
+    bundle exec gencon_index harvest --mapfile=solr_map.yml path/to/datafile.csv
+
+Harvest all CSV files from a directory
+
+    bundle exec gencon_index harvest_all --directory=/tmp/gencon --pattern=*.csv --mapfile=solr_map.yml
+
+Generate a mapping file from a CSV header
+
+    bundle exec gencon_index makemap --id=ID --map=solr_map.yml path/to/datafile.csv
+
+Generate a Blacklight config partial from the map
+
+    bundle exec gencon_index blconfig --output=_blacklight_config.rb solr_map.yml
+
+Send a commit to Solr
+
+    bundle exec gencon_index commit --solr-url=http://localhost:8090/solr/gencon50-1.0.0
