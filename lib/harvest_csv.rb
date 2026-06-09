@@ -49,26 +49,21 @@ module HarvestCSV
     logger = Logger.new($stdout)
     logger.info("Batch size = #{batch_size}")
     schema_map = YAML.load_file(map_source)
-    batch_thread = []
 
     csv = CSV.read(csv_source, headers: true, encoding: "utf-8")
 
     progressbar = ProgressBar.create(title: "Harvest ", total: csv.count, format: "%t (%c/%C) %a |%B|")
     solr = RSolr.connect url: solr_endpoint
     csv.each_slice(batch_size) do |batch|
-      batch_thread << Thread.new do
-        document_batch = []
-        batch.each do |item|
-          document_batch << csv_to_solr(item.to_h, schema_map)
-          progressbar.increment
-        end
-        solr.add document_batch, add_attributes: { commitWithin: 10 }
+      document_batch = batch.map do |item|
+        progressbar.increment
+        csv_to_solr(item.to_h, schema_map)
       end
 
-      solr.commit
-
-      batch_thread.each(&:join)
+      solr.add(document_batch)
     end
+
+    solr.commit
   end
 
   def self.make_map(csv_path,
