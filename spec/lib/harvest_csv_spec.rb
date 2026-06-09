@@ -123,21 +123,41 @@ RSpec.describe GenconIndex::HarvestCSV do
       allow(progress_bar).to receive(:increment)
     end
 
-    it "transforms CSV rows and sends them to Solr in batches" do
-      documents = []
-      mutex = Mutex.new
+    it "transforms CSV rows and sends them to Solr once per batch before committing" do
+      first_batch = nil
+      second_batch = nil
 
-      allow(solr_client).to receive(:add) do |batch, options|
-        expect(options).to eq(add_attributes: { commitWithin: 10 })
-        mutex.synchronize { documents.concat(batch) }
+      expect(solr_client).to receive(:add).ordered do |batch|
+        first_batch = batch
       end
+      expect(solr_client).to receive(:add).ordered do |batch|
+        second_batch = batch
+      end
+      expect(solr_client).to receive(:commit).ordered
 
       described_class.harvest(csv_path, map_path, solr_url, 1)
 
-      expect(documents.size).to eq(2)
-      expect(documents.map { |doc| doc["id"] }).to contain_exactly("2024-ABC123", "2025-Custom-99")
-      expect(solr_client).to have_received(:commit).at_least(:once)
+      expect(first_batch).to contain_exactly(
+        include("id" => "2024-ABC123", "original_order_display" => "ABC123", "year_display" => "2024")
+      )
+      expect(second_batch).to contain_exactly(
+        include("id" => "2025-Custom-99", "original_order_display" => "XYZ789", "year_display" => "2025")
+      )
       expect(progress_bar).to have_received(:increment).exactly(2).times
+    end
+
+    it "does not create threads during harvest" do
+      expect(Thread).not_to receive(:new)
+
+      described_class.harvest(csv_path, map_path, solr_url, 1)
+    end
+
+    it "raises errors from solr.add" do
+      allow(solr_client).to receive(:add).and_raise(StandardError, "add failed")
+
+      expect do
+        described_class.harvest(csv_path, map_path, solr_url, 1)
+      end.to raise_error(StandardError, "add failed")
     end
   end
 end

@@ -32,8 +32,7 @@ RSpec.describe GenconIndex::CLI do
 
       allow(RSolr).to receive(:connect).with(url: "http://localhost:8983/solr").and_return(solr_client)
       allow(solr_client).to receive(:commit)
-      allow(solr_client).to receive(:add) do |batch, options|
-        expect(options).to eq(add_attributes: { commitWithin: 10 })
+      allow(solr_client).to receive(:add) do |batch|
         added_documents.concat(batch)
       end
       allow(ProgressBar).to receive(:create).and_return(progress_bar)
