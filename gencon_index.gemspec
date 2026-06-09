@@ -2,6 +2,7 @@
 
 require_relative "lib/gencon_index/version"
 
+# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name = "gencon_index"
   spec.version = GenconIndex::VERSION
@@ -34,3 +35,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "yaml", "~> 0.4.0"
   spec.metadata["rubygems_mfa_required"] = "true"
 end
+# rubocop:enable Metrics/BlockLength

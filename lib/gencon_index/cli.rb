@@ -12,9 +12,10 @@ module GenconIndex
       HarvestCSV.harvest(csv_file, mapfile, solr_url, batch_size)
     end
 
+    # rubocop:disable Metrics/ParameterLists
     def harvest_all(directory: "/tmp/gencon", pattern: "*.csv", mapfile: "solr_map.yml",
                     solr_url: ENV.fetch("SOLR_URL", nil), batch_size: 100, output: $stdout)
-      Dir[File.join(directory, pattern)].sort.each do |file_name|
+      Dir[File.join(directory, pattern)].each do |file_name|
         file_path = File.expand_path(file_name)
         output.puts("process #{file_path}")
         harvest(
@@ -25,6 +26,7 @@ module GenconIndex
         )
       end
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def makemap(csv_file:, id: "ID", map: "solr_map.yml")
       id_field = id.parameterize.underscore

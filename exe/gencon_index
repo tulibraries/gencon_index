@@ -110,6 +110,7 @@ module GenconIndex
     end
 
     post do |_global, _command, _options, _args|
+      nil
     end
 
     on_error do |_exception|

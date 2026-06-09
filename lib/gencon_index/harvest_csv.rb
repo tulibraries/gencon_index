@@ -60,7 +60,6 @@ module GenconIndex
           csv_to_solr(item.to_h, schema_map)
         end
         solr.add(document_batch)
-        
       end
       solr.commit
     end
