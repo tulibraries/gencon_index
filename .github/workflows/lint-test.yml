@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         ruby: ["3.4"]
 
@@ -24,7 +24,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - name: Run RuboCop
+      - name: Run Rubocop
         run: bundle exec rubocop
 
   test:
