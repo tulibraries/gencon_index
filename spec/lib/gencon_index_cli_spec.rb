@@ -99,7 +99,7 @@ RSpec.describe GenconIndex::CLI do
       output = StringIO.new
 
       allow(Dir).to receive(:[]).with("/tmp/gencon/*.csv").and_return(
-        ["/tmp/gencon/b.csv", "/tmp/gencon/a.csv"]
+        ["/tmp/gencon/a.csv", "/tmp/gencon/b.csv"]
       )
 
       expect(described_class).to receive(:harvest).with(
