@@ -34,9 +34,9 @@ Configure dotenv to use SolrWrapper
 
     cp .env.example .env
 
-Ensure .env contains
+Ensure .env contains the Gencon50 collection current version.
 
-    SOLR_URL="http://localhost:8090/solr/gencon50-1.0.0"
+    SOLR_URL="http://localhost:8090/solr/gencon50-<current-version>"
 
 ### Start up SolrCloud
 
@@ -69,4 +69,4 @@ Generate a Blacklight config partial from the map
 
 Send a commit to Solr
 
-    bundle exec gencon_index commit --solr-url=http://localhost:8090/solr/gencon50-1.0.0
+    bundle exec gencon_index commit --solr-url=http://localhost:8090/solr/gencon50-<current-version>
