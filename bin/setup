@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+
+ROOT = File.expand_path("..", __dir__)
+
+Dir.chdir(ROOT) do
+  puts "== Installing dependencies =="
+  system("bundle install") || abort("bundle install failed")
+end

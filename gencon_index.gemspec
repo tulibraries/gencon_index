@@ -17,9 +17,11 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir[
     "README.md",
+    "solr_map.yml",
+    "Rakefile",
+    "bin/*",
     "exe/*",
-    "lib/**/*.rb",
-    "solr_map.yml"
+    "lib/**/*.rb"
   ]
   spec.bindir = "exe"
   spec.executables = ["gencon_index"]

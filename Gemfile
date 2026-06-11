@@ -9,6 +9,7 @@ group :development, :test do
   gem "solr_wrapper", ">= 4.0.2"
   gem "pry"
   gem "rubocop", require: false
+  gem "rake"
 end
 
 group :test do
