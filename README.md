@@ -6,6 +6,8 @@ date: 2025-03-18
 
 # Ingesting CSV for The Best 50 Years in Gaming site to SolrCloud
 
+This is a Ruby gem to harvest Gencon 50 CSV Convention Program for indexing into Solr.
+
 ## System Requirements
 
 Requires Ruby 3.4.0+
