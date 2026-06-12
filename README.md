@@ -20,7 +20,7 @@ https://github.com/tulibraries/ansible-playbook-solrcloud
 
 Install the gem dependencies (generally we do this in an rvm gemset)
 
-    bundle install
+    bin/setup
 
 Create the local environment file
 
@@ -36,9 +36,9 @@ Then set `SOLR_URL` in `.env` to the current Gencon50 collection URL.
 
 ### Start up SolrCloud
 
-    cd ../ansible-playbook-solrcloud
+    cd /PATH/TO/ansible-playbook-solrcloud
     make up-lite
-    cd ../gencon50
+    cd /PATH/TO/gencon50
 
 Run the executable directly from the repo
 
@@ -66,3 +66,17 @@ Generate a Blacklight config partial from the map
 Send a commit to Solr
 
     bundle exec gencon_index commit --solr-url=http://localhost:8090/solr/gencon50-<current-version>
+
+## Development Commands
+
+Test gencon_index
+
+    rake
+
+Or
+
+    make test
+
+Lint gencon_index
+
+    make lint
