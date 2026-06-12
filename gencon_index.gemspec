@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description = "A gem-style CLI for harvesting CSV data and generating Solr mapping helpers."
   spec.homepage = "https://github.com/tulibraries/gencon_index"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.3.0"
+  spec.required_ruby_version = ">= 3.4.0"
 
   spec.files = Dir[
     "README.md",

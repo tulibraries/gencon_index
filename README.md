@@ -8,7 +8,7 @@ date: 2025-03-18
 
 ## System Requirements
 
-Requires Ruby 3.3.0+
+Requires Ruby 3.4.0+
 
 This Blacklight instance requires SolrCloud. A local version of SolrCloud may be run
 by using the TULibraries Ansible SolrCloud Playbook:
@@ -22,19 +22,15 @@ Install the gem dependencies (generally we do this in an rvm gemset)
 
     bundle install
 
-Create the application file
+Create the local environment file
 
     cp .env.example .env
 
-and edit the `.env` content's `SOLR_URL` enviornment variable.
+Then set `SOLR_URL` in `.env` to the current Gencon50 collection URL.
 
 ## Configure for Solr
 
-Configure dotenv to use SolrWrapper
-
-    cp .env.example .env
-
-Ensure .env contains the Gencon50 collection current version.
+`gencon_index` loads `.env` for CLI usage. Ensure `.env` contains the current Gencon50 collection URL.
 
     SOLR_URL="http://localhost:8090/solr/gencon50-<current-version>"
 
