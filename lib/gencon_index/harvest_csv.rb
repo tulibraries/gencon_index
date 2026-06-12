@@ -110,5 +110,3 @@ module GenconIndex
     end
   end
 end
-
-HarvestCSV = GenconIndex::HarvestCSV
