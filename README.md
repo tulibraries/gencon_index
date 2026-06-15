@@ -40,7 +40,7 @@ Set `SOLR_URL` in `.env` to the current Gencon50 collection URL.
 
     cd /PATH/TO/ansible-playbook-solrcloud
     make up-lite
-    cd /PATH/TO/gencon50
+    cd /PATH/TO/gencon_index
 
 Run the executable directly from the repo
 
@@ -54,7 +54,7 @@ Run the executable directly from the repo
 To seed the database with a CSV file from the command line, use the following command. Replace `path/to/datafile.csv`
 with the path to the file to upload.
 
-    bundle exec gencon_index harvest --mapfile=solr_map.yml path/to/datafile.csv
+    bundle exec gencon_index harvest --mapfile=solr_map.yml PATH/TO/datafile.csv
 
 ### Harvest all CSV files from a directory
 
@@ -62,7 +62,7 @@ with the path to the file to upload.
 
 ### Generate a mapping file
 
-    bundle exec gencon_index makemap --id=ID --map=solr_map.yml path/to/datafile.csv
+    bundle exec gencon_index makemap --id=ID --map=solr_map.yml PATH/TO/datafile.csv
 
 ### Generate a Blacklight config partial
 

@@ -10,7 +10,7 @@ This note captures the current behavior of `gencon_index` and the `cob_index` re
 
 - `exe/gencon_index` is the only Ruby CLI entrypoint shipped by the gem.
 - The gemspec exposes that entrypoint as the installed command `gencon_index`.
-- `harvest_notes.sh` exists as a repo-local helper script, but it is not part of the gem executable surface.
+- `bin/setup` and `bin/console` exist as developer convenience scripts and are not part of the gem executable surface.
 
 ### Current command names and options
 
@@ -62,8 +62,8 @@ This note captures the current behavior of `gencon_index` and the `cob_index` re
 - `lib/gencon_index/cli.rb` requires `dotenv/load`, so environment variables are loaded at process startup from `.env` if present.
 - `SOLR_URL` is the only runtime environment variable used directly in the Ruby code.
 - The checked-in `solr_map.yml` is the default mapping configuration.
-- There is no central config object, no `bin/setup`, no Makefile-driven env bootstrap, and no multi-environment config layout.
-- The README instructs the developer to copy `.env.example` to `.env`, but `.env.example` is not currently present in the repo.
+- There is no central config object or multi-environment config layout.
+- The repo now includes `.env.example`, `bin/setup`, and a top-level `Makefile` for local bootstrap and common commands.
 
 ### Solr interaction
 
@@ -76,8 +76,8 @@ This note captures the current behavior of `gencon_index` and the `cob_index` re
 
 - Specs are limited to unit/command-dispatch coverage:
   - `spec/exe/gencon_index_spec.rb`
-  - `spec/lib/gencon_index_cli_spec.rb`
-  - `spec/lib/harvest_csv_spec.rb`
+  - `spec/gencon_index/cli_spec.rb`
+  - `spec/gencon_index/harvest_csv_spec.rb`
   - `spec/factories/harvest.rb`
 - Covered behavior includes:
   - CLI command dispatch

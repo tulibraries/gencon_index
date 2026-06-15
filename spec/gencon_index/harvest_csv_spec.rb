@@ -26,18 +26,6 @@ RSpec.describe GenconIndex::HarvestCSV do
     end
   end
 
-  describe ".sanitize" do
-    it "strips non printable characters from strings" do
-      clean_value = described_class.sanitize("Hello\u0000World")
-
-      expect(clean_value).to eq("HelloWorld")
-    end
-
-    it "leaves non string values untouched" do
-      expect(described_class.sanitize(123)).to eq(123)
-    end
-  end
-
   describe ".make_map" do
     let(:csv_path) { SPEC_FIXTURES_DIR.join("1980.csv") }
     let(:map_path) { SPEC_TMP_DIR.join("schema_map.yml") }

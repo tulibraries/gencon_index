@@ -105,14 +105,6 @@ module GenconIndex
       end
     end
 
-    pre do |_global, _command, _options, _args|
-      true
-    end
-
-    post do |_global, _command, _options, _args|
-      nil
-    end
-
     on_error do |_exception|
       true
     end

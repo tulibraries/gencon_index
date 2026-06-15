@@ -19,7 +19,6 @@ Gem::Specification.new do |spec|
     "README.md",
     "solr_map.yml",
     "Rakefile",
-    "bin/*",
     "exe/*",
     "lib/**/*.rb"
   ]
