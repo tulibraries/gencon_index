@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gencon_index (0.1.0)
+    gencon_index (0.2.0)
       activesupport (~> 8.1)
       csv (~> 3.3)
       dotenv (~> 3.2)
