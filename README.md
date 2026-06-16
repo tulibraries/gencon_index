@@ -95,6 +95,18 @@ Run the executable directly from the repo
 
 ## Commands
 
+### CSV encoding
+
+Input CSV files must be UTF-8 encoded.
+
+If a source file was saved with a Windows encoding such as `Windows-1252`, convert it to UTF-8 before running `gencon_index`:
+
+    iconv -f WINDOWS-1252 -t UTF-8 input.csv > output.utf8.csv
+
+You can then load the converted file with:
+
+    bundle exec gencon_index harvest --mapfile=solr_map.yml output.utf8.csv
+
 ### Harvest a CSV File
 
 To seed the database with a CSV file from the command line, use the following command. Replace `path/to/datafile.csv`
