@@ -14,9 +14,8 @@ date: 2025-03-18
 
 Requires Ruby 3.4.0+
 
-This Blacklight instance requires SolrCloud. A local version of SolrCloud may be run
-by using the TULibraries Ansible SolrCloud Playbook:
-https://github.com/tulibraries/ansible-playbook-solrcloud
+This indexer targets SolrCloud. A local SolrCloud is included in this repo via
+`docker-compose.yml` and the Solr configset in `solr/gencon50-solr`.
 
 ## Install
 
@@ -34,13 +33,32 @@ Set `SOLR_URL` in `.env` to the current Gencon50 collection URL.
 
 `gencon_index` loads `.env` for CLI usage. Ensure `.env` contains the current Gencon50 collection URL.
 
-    SOLR_URL="http://localhost:8090/solr/gencon50-<current-version>"
+    SOLR_URL="http://localhost:8090/solr/gencon50-dev"
 
 ### Start up SolrCloud
 
-    cd /PATH/TO/ansible-playbook-solrcloud
-    make up-lite
-    cd /PATH/TO/gencon_index
+    make up
+    make reset
+
+### Use an external SolrCloud
+
+For a separate SolrCloud instance, such as `ansible-playbook-solrcloud`, start from
+the external-cluster example env file instead of the local Docker one.
+
+    cp .env.solrcloud.example .env
+
+Update the values in `.env` for the target cluster:
+
+- `SOLR_HOSTNAME` should be the hostname for the target SolrCloud instance.
+- `SOLR_HOST` may include basic auth credentials when the SolrCloud instance requires them.
+- `SOLR_URL` should point at the target collection or alias for that cluster.
+- `SOLR_PORT` should match the published Solr port for that environment.
+
+Example:
+
+    SOLR_HOSTNAME=solrcloud.example.org
+    SOLR_HOST=http://${SOLR_USER}:${SOLR_PASSWORD}@${SOLR_HOSTNAME}:${SOLR_PORT}
+    SOLR_URL=${SOLR_HOST}/solr/gencon50-v3.0.1
 
 Run the executable directly from the repo
 
@@ -70,9 +88,21 @@ with the path to the file to upload.
 
 ## Commit to Solr
 
-    bundle exec gencon_index commit --solr-url=http://localhost:8090/solr/gencon50-<current-version>
+    bundle exec gencon_index commit --solr-url=http://localhost:8090/solr/gencon50-dev
+
+Or:
+
+    make commit
 
 ## Development Commands
+
+Show local SolrCloud state
+
+    make solr-status
+
+Load all checked-in CSVs from `./csv` into the local collection
+
+    make load-data
 
 Test gencon_index
 

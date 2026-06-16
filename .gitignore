@@ -9,3 +9,4 @@ csv/
 spec/examples.txt
 csv/*
 !csv/.keep
+pkg/
