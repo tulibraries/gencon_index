@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gencon_index (0.1.0)
+    gencon_index (0.2.0)
       activesupport (~> 8.1)
       csv (~> 3.3)
       dotenv (~> 3.2)
@@ -73,6 +73,7 @@ GEM
       method_source (~> 1.0)
     racc (1.8.1)
     rainbow (3.1.1)
+    rake (13.4.2)
     regexp_parser (2.11.3)
     retriable (3.1.2)
     rsolr (2.6.0)
@@ -130,6 +131,7 @@ DEPENDENCIES
   factory_bot (~> 6.4)
   gencon_index!
   pry
+  rake
   rspec (~> 3.13)
   rubocop
   solr_wrapper (>= 4.0.2)

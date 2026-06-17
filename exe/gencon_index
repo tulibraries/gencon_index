@@ -104,19 +104,9 @@ module GenconIndex
         GenconIndex::CLI.commit(solr_url: options[:solr_url])
       end
     end
-
-    pre do |_global, _command, _options, _args|
-      true
-    end
-
-    post do |_global, _command, _options, _args|
-      nil
-    end
-
-    on_error do |_exception|
-      true
-    end
   end
 end
 
-exit GenconIndex::App.run(ARGV) if $PROGRAM_NAME == __FILE__
+if File.expand_path($PROGRAM_NAME) == __FILE__ || File.basename($PROGRAM_NAME) == "gencon_index"
+  exit GenconIndex::App.run(ARGV)
+end

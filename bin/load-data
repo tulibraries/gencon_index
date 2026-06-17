@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ -f ".env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source ".env"
+  set +a
+fi
+
+SOLR_PORT="${SOLR_PORT:-8090}"
+SOLR_SCHEME="${SOLR_SCHEME:-http}"
+SOLR_HOSTNAME="${SOLR_HOSTNAME:-localhost}"
+SOLR_HOST="${SOLR_HOST:-${SOLR_SCHEME}://${SOLR_HOSTNAME}:${SOLR_PORT}}"
+SOLR_USER="${SOLR_USER:-}"
+SOLR_PASSWORD="${SOLR_PASSWORD:-}"
+SOLR_CONFIGSET="${SOLR_CONFIGSET:-gencon50}"
+SOLR_COLLECTION="${SOLR_COLLECTION:-gencon50-dev}"
+SOLR_ALIAS="${SOLR_ALIAS:-gencon50-current}"
+SOLR_CONFIG_DIR="${SOLR_CONFIG_DIR:-solr/gencon50-solr}"
+SOLR_CONFIG_ZIP="${SOLR_CONFIG_ZIP:-/tmp/${SOLR_CONFIGSET}.zip}"
+SOLR_CONFIG_STAGE_DIR="${SOLR_CONFIG_STAGE_DIR:-/tmp/${SOLR_CONFIGSET}-configset}"
+SOLR_URL="${SOLR_URL:-${SOLR_HOST}/solr/${SOLR_COLLECTION}}"
+SOLR_WAIT_ATTEMPTS="${SOLR_WAIT_ATTEMPTS:-30}"
+SOLR_WAIT_DELAY="${SOLR_WAIT_DELAY:-2}"
+
+curl_args=(-fsS)
+if [[ -n "${SOLR_USER}" ]]; then
+  curl_args+=(-u "${SOLR_USER}:${SOLR_PASSWORD}")
+fi
+
+attempt=1
+until curl "${curl_args[@]}" "${SOLR_HOST}/solr/admin/info/system?wt=json" > /dev/null; do
+  if [[ "${attempt}" -ge "${SOLR_WAIT_ATTEMPTS}" ]]; then
+    echo "Solr did not become ready at ${SOLR_HOST}/solr after ${SOLR_WAIT_ATTEMPTS} attempts" >&2
+    exit 1
+  fi
+
+  echo "Waiting for Solr at ${SOLR_HOST}/solr (attempt ${attempt}/${SOLR_WAIT_ATTEMPTS})"
+  attempt=$((attempt + 1))
+  sleep "${SOLR_WAIT_DELAY}"
+done
+
+rm -rf "${SOLR_CONFIG_STAGE_DIR}"
+mkdir -p "${SOLR_CONFIG_STAGE_DIR}"
+cp -R "${SOLR_CONFIG_DIR}/." "${SOLR_CONFIG_STAGE_DIR}"
+rm -rf "${SOLR_CONFIG_STAGE_DIR}/.git" "${SOLR_CONFIG_STAGE_DIR}/.github"
+rm -f "${SOLR_CONFIG_STAGE_DIR}/README.md"
+ruby -e 'path = ARGV.fetch(0); filtered = File.readlines(path).reject { |line| line.include?("analysis-extras/lib") }; File.write(path, filtered.join)' "${SOLR_CONFIG_STAGE_DIR}/solrconfig.xml"
+rm -f "${SOLR_CONFIG_ZIP}"
+(cd "${SOLR_CONFIG_STAGE_DIR}" && find . -type f -print | sort | zip -q -@ "${SOLR_CONFIG_ZIP}")
+
+if curl "${curl_args[@]}" "${SOLR_HOST}/solr/admin/configs?action=LIST&omitHeader=true&wt=json" | grep -q "\"${SOLR_CONFIGSET}\""; then
+  echo "Configset ${SOLR_CONFIGSET} already exists"
+else
+  curl "${curl_args[@]}" -X POST \
+    --header "Content-Type: application/octet-stream" \
+    --data-binary @"${SOLR_CONFIG_ZIP}" \
+    "${SOLR_HOST}/solr/admin/configs?action=UPLOAD&name=${SOLR_CONFIGSET}"
+fi
+
+if curl "${curl_args[@]}" "${SOLR_HOST}/solr/admin/collections?action=LIST&wt=json" | grep -q "\"${SOLR_COLLECTION}\""; then
+  echo "Collection ${SOLR_COLLECTION} already exists"
+else
+  curl "${curl_args[@]}" \
+    "${SOLR_HOST}/solr/admin/collections?action=CREATE&name=${SOLR_COLLECTION}&numShards=1&replicationFactor=1&maxShardsPerNode=1&collection.configName=${SOLR_CONFIGSET}"
+fi
+
+curl "${curl_args[@]}" \
+  "${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=${SOLR_ALIAS}&collections=${SOLR_COLLECTION}"
+
+SOLR_URL="${SOLR_URL}" bundle exec gencon_index harvest_all --directory=./csv --pattern='*.csv' --mapfile=solr_map.yml

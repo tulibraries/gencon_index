@@ -2,5 +2,11 @@
 
 *.sw[p-z]
 
+.env
+.bundle
+coverage/
 csv/
 spec/examples.txt
+csv/*
+!csv/.keep
+pkg/

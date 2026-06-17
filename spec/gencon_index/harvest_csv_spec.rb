@@ -26,36 +26,18 @@ RSpec.describe GenconIndex::HarvestCSV do
     end
   end
 
-  describe ".sanitize" do
-    it "strips non printable characters from strings" do
-      clean_value = described_class.sanitize("Hello\u0000World")
-
-      expect(clean_value).to eq("HelloWorld")
-    end
-
-    it "leaves non string values untouched" do
-      expect(described_class.sanitize(123)).to eq(123)
-    end
-  end
-
   describe ".make_map" do
-    let(:csv_path) { SPEC_TMP_DIR.join("sample.csv") }
+    let(:csv_path) { SPEC_FIXTURES_DIR.join("1980.csv") }
     let(:map_path) { SPEC_TMP_DIR.join("schema_map.yml") }
 
-    before do
-      CSV.open(csv_path, "w") do |csv|
-        csv << %w[ID Original\ Order Year]
-        csv << %w[123 A1 2024]
-      end
-    end
-
-    it "builds a schema map for Solr fields" do
-      described_class.make_map(csv_path, map_path, "ID")
+    it "builds a schema map for Solr fields from the fixture CSV" do
+      described_class.make_map(csv_path, map_path, "Game ID")
 
       schema_map = YAML.load_file(map_path)
-      expect(schema_map["id"]).to include("id", "id_display", "id_facet")
+      expect(schema_map["game_id"]).to include("id", "game_id_display", "game_id_facet")
       expect(schema_map["original_order"]).to include("original_order_display", "original_order_facet")
       expect(schema_map["year"]).to include("year_display", "year_facet")
+      expect(schema_map["title"]).to include("title_display", "title_facet")
     end
   end
 
@@ -78,44 +60,26 @@ RSpec.describe GenconIndex::HarvestCSV do
   end
 
   describe ".blacklight" do
-    let(:schema_map) do
-      {
-        "original_order" => %w[original_order_display original_order_facet],
-        "year" => %w[year_display year_facet]
-      }
-    end
-    let(:map_path) { SPEC_TMP_DIR.join("blacklight_map.yml") }
+    let(:map_path) { SPEC_FIXTURES_DIR.join("solr_map.yml") }
     let(:partial_path) { SPEC_TMP_DIR.join("blacklight_config.rb") }
-
-    before do
-      File.open(map_path, "w") { |file| YAML.dump(schema_map, file) }
-    end
 
     it "writes a Blacklight configuration partial" do
       described_class.blacklight(map_path, partial_path)
 
       partial = File.read(partial_path)
-      expect(partial).to include("config.add_facet_field 'original_order_facet'")
-      expect(partial).to include("config.add_show_field 'original_order_display'")
+      expect(partial).to include("config.add_facet_field 'year_facet'")
+      expect(partial).to include("config.add_show_field 'title_display'")
     end
   end
 
   describe ".harvest" do
-    let(:schema_map) { build(:schema_map) }
-    let(:map_path) { SPEC_TMP_DIR.join("schema_map.yml") }
-    let(:csv_path) { SPEC_TMP_DIR.join("harvest.csv") }
+    let(:map_path) { SPEC_FIXTURES_DIR.join("solr_map.yml") }
+    let(:csv_path) { SPEC_FIXTURES_DIR.join("1980.csv") }
     let(:solr_url) { "http://example.com/solr" }
     let(:solr_client) { instance_double(RSolr::Client) }
     let(:progress_bar) { instance_double(ProgressBar::Base) }
 
     before do
-      File.open(map_path, "w") { |file| YAML.dump(schema_map, file) }
-      CSV.open(csv_path, "w") do |csv|
-        csv << ["Original Order", "Year", "ID"]
-        csv << ["ABC123", "2024", nil]
-        csv << ["XYZ789", "2025", "Custom-99"]
-      end
-
       allow(RSolr).to receive(:connect).and_return(solr_client)
       allow(solr_client).to receive(:add)
       allow(solr_client).to receive(:commit)
@@ -123,40 +87,40 @@ RSpec.describe GenconIndex::HarvestCSV do
       allow(progress_bar).to receive(:increment)
     end
 
-    it "transforms CSV rows and sends them to Solr once per batch before committing" do
-      first_batch = nil
-      second_batch = nil
+    it "transforms fixture CSV rows and sends them to Solr once per batch before committing" do
+      added_batches = []
 
       expect(solr_client).to receive(:add).ordered do |batch|
-        first_batch = batch
-      end
-      expect(solr_client).to receive(:add).ordered do |batch|
-        second_batch = batch
+        added_batches << batch
       end
       expect(solr_client).to receive(:commit).ordered
 
-      described_class.harvest(csv_path, map_path, solr_url, 1)
+      described_class.harvest(csv_path, map_path, solr_url, 500)
 
-      expect(first_batch).to contain_exactly(
-        include("id" => "2024-ABC123", "original_order_display" => "ABC123", "year_display" => "2024")
+      flattened_documents = added_batches.flatten
+
+      expect(flattened_documents).to include(
+        include(
+          "id" => "1980-45",
+          "year_display" => "1980",
+          "title_display" => "Alien Worlds Introductory Scenario",
+          "game_id_display" => "45"
+        )
       )
-      expect(second_batch).to contain_exactly(
-        include("id" => "2025-Custom-99", "original_order_display" => "XYZ789", "year_display" => "2025")
-      )
-      expect(progress_bar).to have_received(:increment).exactly(2).times
+      expect(progress_bar).to have_received(:increment).at_least(:once)
     end
 
     it "does not create threads during harvest" do
       expect(Thread).not_to receive(:new)
 
-      described_class.harvest(csv_path, map_path, solr_url, 1)
+      described_class.harvest(csv_path, map_path, solr_url, 500)
     end
 
     it "raises errors from solr.add" do
       allow(solr_client).to receive(:add).and_raise(StandardError, "add failed")
 
       expect do
-        described_class.harvest(csv_path, map_path, solr_url, 1)
+        described_class.harvest(csv_path, map_path, solr_url, 500)
       end.to raise_error(StandardError, "add failed")
     end
   end

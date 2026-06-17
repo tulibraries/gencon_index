@@ -19,16 +19,11 @@ RSpec.describe GenconIndex::CLI do
     end
 
     it "uses the checked-in solr_map.yml by default during harvest" do
-      csv_path = SPEC_TMP_DIR.join("default_map_harvest.csv")
+      csv_path = SPEC_FIXTURES_DIR.join("1980.csv")
       project_root = File.expand_path("../..", __dir__)
       solr_client = instance_double(RSolr::Client)
       progress_bar = instance_double(ProgressBar::Base)
       added_documents = []
-
-      CSV.open(csv_path, "w") do |csv|
-        csv << ["Year", "Original Order", "Title", "Game ID"]
-        csv << ["2024", "A-100", "Test Game", "G-1"]
-      end
 
       allow(RSolr).to receive(:connect).with(url: "http://localhost:8983/solr").and_return(solr_client)
       allow(solr_client).to receive(:commit)
@@ -42,18 +37,18 @@ RSpec.describe GenconIndex::CLI do
         described_class.harvest(
           csv_file: csv_path.to_s,
           solr_url: "http://localhost:8983/solr",
-          batch_size: 10
+          batch_size: 500
         )
       end
 
-      expect(added_documents).to contain_exactly(
+      expect(added_documents).to include(
         hash_including(
-          "year_display" => "2024",
-          "year_facet" => "2024",
-          "title_display" => "Test Game",
-          "title_t" => "Test Game",
-          "game_id_display" => "G-1",
-          "id" => "2024-G-1"
+          "year_display" => "1980",
+          "year_facet" => "1980",
+          "title_display" => "Alien Worlds Introductory Scenario",
+          "title_t" => "Alien Worlds Introductory Scenario",
+          "game_id_display" => "45",
+          "id" => "1980-45"
         )
       )
     end

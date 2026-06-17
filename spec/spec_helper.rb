@@ -9,6 +9,7 @@ require "factory_bot"
 
 SPEC_ROOT = Pathname.new(__dir__)
 SPEC_TMP_DIR = SPEC_ROOT.join("tmp")
+SPEC_FIXTURES_DIR = SPEC_ROOT.join("fixtures")
 FileUtils.mkdir_p(SPEC_TMP_DIR)
 support_path = SPEC_ROOT.join("support", "**", "*.rb")
 Dir[support_path].each { |file| require file }

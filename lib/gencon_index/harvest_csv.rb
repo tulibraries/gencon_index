@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
-require "rubygems"
 require "csv"
 require "rsolr"
 require "yaml"
 require "ruby-progressbar"
 require "logger"
-require "active_support"
 require "active_support/core_ext/string/inflections"
 
 module GenconIndex
@@ -34,12 +32,6 @@ module GenconIndex
       end
 
       document
-    end
-
-    def sanitize(value)
-      return value unless value.is_a?(String)
-
-      value.gsub(/[^[:print:]]/, "")
     end
 
     def harvest(csv_source,
@@ -110,5 +102,3 @@ module GenconIndex
     end
   end
 end
-
-HarvestCSV = GenconIndex::HarvestCSV

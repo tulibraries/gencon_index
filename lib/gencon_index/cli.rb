@@ -9,7 +9,7 @@ module GenconIndex
     module_function
 
     def harvest(csv_file:, mapfile: "solr_map.yml", solr_url: ENV.fetch("SOLR_URL", nil), batch_size: 100)
-      HarvestCSV.harvest(csv_file, mapfile, solr_url, batch_size)
+      GenconIndex::HarvestCSV.harvest(csv_file, mapfile, solr_url, batch_size)
     end
 
     # rubocop:disable Metrics/ParameterLists
@@ -31,12 +31,12 @@ module GenconIndex
     def makemap(csv_file:, id: "ID", map: "solr_map.yml")
       id_field = id.parameterize.underscore
       File.open(map, "w") do |map_file|
-        HarvestCSV.make_map(csv_file, map_file, id_field)
+        GenconIndex::HarvestCSV.make_map(csv_file, map_file, id_field)
       end
     end
 
     def blconfig(mapfile: "solr_map.yml", output: "_blacklight_config.rb")
-      HarvestCSV.blacklight(mapfile, output)
+      GenconIndex::HarvestCSV.blacklight(mapfile, output)
     end
 
     def commit(solr_url: ENV.fetch("SOLR_URL", nil))

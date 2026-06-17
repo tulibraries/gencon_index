@@ -6,15 +6,20 @@ require_relative "../../lib/gencon_index"
 load File.expand_path("../../exe/gencon_index", __dir__)
 
 RSpec.describe GenconIndex::App do
-  def run_command(*args)
+  def capture_command(*args)
     stdout = $stdout
     stderr = $stderr
     $stdout = StringIO.new
     $stderr = StringIO.new
-    described_class.run(args)
+    result = described_class.run(args)
+    { result: result, stdout: $stdout.string, stderr: $stderr.string }
   ensure
     $stdout = stdout
     $stderr = stderr
+  end
+
+  def run_command(...)
+    capture_command(...)[:result]
   end
 
   describe ".run" do
@@ -74,6 +79,13 @@ RSpec.describe GenconIndex::App do
       )
 
       run_command("commit", "--solr-url=http://localhost:8983/solr")
+    end
+
+    it "surfaces harvest errors instead of silently swallowing them" do
+      allow(GenconIndex::CLI).to receive(:harvest).and_raise(StandardError, "solr unavailable")
+      output = capture_command("harvest", "--mapfile=map.yml", "data.csv")
+
+      expect(output[:result]).to eq(1)
     end
   end
 end

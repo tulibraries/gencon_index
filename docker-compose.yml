@@ -1,0 +1,21 @@
+services:
+  zookeeper:
+    image: zookeeper:3.9
+    ports:
+      - "2181:2181"
+
+  solr:
+    build:
+      context: .
+      dockerfile: .docker/solr/Dockerfile
+    depends_on:
+      - zookeeper
+    environment:
+      SOLR_MODULES: analysis-extras
+    ports:
+      - "${SOLR_PORT:-8983}:8983"
+    command:
+      - solr-fg
+      - -c
+      - -z
+      - zookeeper:2181

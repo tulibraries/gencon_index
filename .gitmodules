@@ -1,0 +1,3 @@
+[submodule "solr/gencon50-solr"]
+	path = solr/gencon50-solr
+	url = https://github.com/tulibraries/gencon50-solr.git
