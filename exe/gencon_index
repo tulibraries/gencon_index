@@ -20,7 +20,7 @@ module GenconIndex
       c.flag [:mapfile], default_value: "solr_map.yml"
 
       c.desc "Solr endpoint"
-      c.flag [:solr_url], default_value: ENV.fetch("SOLR_URL", nil)
+      c.flag [:solr_url]
 
       c.desc "Number of records to send per batch"
       c.flag [:batch_size], default_value: 100
@@ -29,7 +29,7 @@ module GenconIndex
         GenconIndex::CLI.harvest(
           csv_file: args[0],
           mapfile: options[:mapfile],
-          solr_url: options[:solr_url],
+          solr_url: options[:solr_url] || ENV.fetch("SOLR_URL", nil),
           batch_size: options[:batch_size].to_i
         )
       end
@@ -38,7 +38,7 @@ module GenconIndex
     desc "Harvest all matching CSV files from a directory"
     command :harvest_all do |c|
       c.desc "Directory containing CSV files"
-      c.flag [:directory], default_value: "/tmp/gencon"
+      c.flag [:directory]
 
       c.desc "Glob pattern used to select files"
       c.flag [:pattern], default_value: "*.csv"
@@ -47,17 +47,17 @@ module GenconIndex
       c.flag [:mapfile], default_value: "solr_map.yml"
 
       c.desc "Solr endpoint"
-      c.flag [:solr_url], default_value: ENV.fetch("SOLR_URL", nil)
+      c.flag [:solr_url]
 
       c.desc "Number of records to send per batch"
       c.flag [:batch_size], default_value: 100
 
       c.action do |_global_options, options, _args|
         GenconIndex::CLI.harvest_all(
-          directory: options[:directory],
+          directory: options[:directory] || ENV.fetch("GENCON_TEMP_PATH", "./csv"),
           pattern: options[:pattern],
           mapfile: options[:mapfile],
-          solr_url: options[:solr_url],
+          solr_url: options[:solr_url] || ENV.fetch("SOLR_URL", nil),
           batch_size: options[:batch_size].to_i
         )
       end
@@ -98,10 +98,10 @@ module GenconIndex
     desc "Send a commit command to the Solr instance"
     command :commit do |c|
       c.desc "Solr endpoint"
-      c.flag [:solr_url], default_value: ENV.fetch("SOLR_URL", nil)
+      c.flag [:solr_url]
 
       c.action do |_global_options, options, _args|
-        GenconIndex::CLI.commit(solr_url: options[:solr_url])
+        GenconIndex::CLI.commit(solr_url: options[:solr_url] || ENV.fetch("SOLR_URL", nil))
       end
     end
   end

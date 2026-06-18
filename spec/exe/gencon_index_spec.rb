@@ -6,6 +6,19 @@ require_relative "../../lib/gencon_index"
 load File.expand_path("../../exe/gencon_index", __dir__)
 
 RSpec.describe GenconIndex::App do
+  around do |example|
+    original_gencon_temp_path = ENV["GENCON_TEMP_PATH"]
+    original_solr_url = ENV["SOLR_URL"]
+    ENV.delete("GENCON_TEMP_PATH")
+    ENV.delete("SOLR_URL")
+    example.run
+  ensure
+    ENV["GENCON_TEMP_PATH"] = original_gencon_temp_path if original_gencon_temp_path
+    ENV["SOLR_URL"] = original_solr_url if original_solr_url
+    ENV.delete("GENCON_TEMP_PATH") unless original_gencon_temp_path
+    ENV.delete("SOLR_URL") unless original_solr_url
+  end
+
   def capture_command(*args)
     stdout = $stdout
     stderr = $stderr
@@ -37,7 +50,7 @@ RSpec.describe GenconIndex::App do
 
     it "dispatches the harvest_all command" do
       expect(GenconIndex::CLI).to receive(:harvest_all).with(
-        directory: "/tmp/gencon",
+        directory: "./csv",
         pattern: "*.csv",
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
@@ -46,12 +59,26 @@ RSpec.describe GenconIndex::App do
 
       run_command(
         "harvest_all",
-        "--directory=/tmp/gencon",
+        "--directory=./csv",
         "--pattern=*.csv",
         "--mapfile=map.yml",
         "--solr_url=http://localhost:8983/solr",
         "--batch_size=50"
       )
+    end
+
+    it "uses GENCON_TEMP_PATH as the default harvest_all directory when set" do
+      ENV["GENCON_TEMP_PATH"] = "/tmp/gencon"
+
+      expect(GenconIndex::CLI).to receive(:harvest_all).with(
+        directory: "/tmp/gencon",
+        pattern: "*.csv",
+        mapfile: "solr_map.yml",
+        solr_url: nil,
+        batch_size: 100
+      )
+
+      run_command("harvest_all")
     end
 
     it "dispatches the makemap command" do

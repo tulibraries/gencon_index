@@ -5,6 +5,23 @@ require "spec_helper"
 require_relative "../../lib/gencon_index"
 
 RSpec.describe GenconIndex::CLI do
+  around do |example|
+    original_gencon_temp_path = ENV["GENCON_TEMP_PATH"]
+    original_solr_user = ENV["SOLR_USER"]
+    original_solr_password = ENV["SOLR_PASSWORD"]
+    ENV.delete("GENCON_TEMP_PATH")
+    ENV.delete("SOLR_USER")
+    ENV.delete("SOLR_PASSWORD")
+    example.run
+  ensure
+    ENV["GENCON_TEMP_PATH"] = original_gencon_temp_path if original_gencon_temp_path
+    ENV["SOLR_USER"] = original_solr_user if original_solr_user
+    ENV["SOLR_PASSWORD"] = original_solr_password if original_solr_password
+    ENV.delete("GENCON_TEMP_PATH") unless original_gencon_temp_path
+    ENV.delete("SOLR_USER") unless original_solr_user
+    ENV.delete("SOLR_PASSWORD") unless original_solr_password
+  end
+
   describe ".harvest" do
     it "delegates to HarvestCSV with provided options" do
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
@@ -14,6 +31,20 @@ RSpec.describe GenconIndex::CLI do
         csv_file: "data.csv",
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
+        batch_size: 250
+      )
+    end
+
+    it "adds basic auth credentials from the provided Solr user and password" do
+      expect(GenconIndex::HarvestCSV).to receive(:harvest)
+        .with("data.csv", "map.yml", "http://user:secret@localhost:8983/solr", 250)
+
+      described_class.harvest(
+        csv_file: "data.csv",
+        mapfile: "map.yml",
+        solr_url: "http://localhost:8983/solr",
+        solr_user: "user",
+        solr_password: "secret",
         batch_size: 250
       )
     end
@@ -87,32 +118,59 @@ RSpec.describe GenconIndex::CLI do
 
       expect(solr_client).to have_received(:commit)
     end
+
+    it "sends commit requests with basic auth credentials when provided" do
+      solr_client = instance_double(RSolr::Client)
+      allow(RSolr).to receive(:connect).with(url: "http://user:secret@localhost:8983/solr").and_return(solr_client)
+      allow(solr_client).to receive(:commit)
+
+      described_class.commit(
+        solr_url: "http://localhost:8983/solr",
+        solr_user: "user",
+        solr_password: "secret"
+      )
+
+      expect(solr_client).to have_received(:commit)
+    end
   end
 
   describe ".harvest_all" do
+    it "defaults the directory from GENCON_TEMP_PATH when set" do
+      ENV["GENCON_TEMP_PATH"] = "/tmp/gencon"
+      output = StringIO.new
+
+      allow(Dir).to receive(:[]).with("/tmp/gencon/*.csv").and_return([])
+
+      described_class.harvest_all(output: output)
+    end
+
     it "processes all matching CSV files in sorted order" do
       output = StringIO.new
 
-      allow(Dir).to receive(:[]).with("/tmp/gencon/*.csv").and_return(
-        ["/tmp/gencon/a.csv", "/tmp/gencon/b.csv"]
+      allow(Dir).to receive(:[]).with("./csv/*.csv").and_return(
+        ["./csv/a.csv", "./csv/b.csv"]
       )
 
       expect(described_class).to receive(:harvest).with(
-        csv_file: "/tmp/gencon/a.csv",
+        csv_file: File.expand_path("./csv/a.csv"),
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
+        solr_user: nil,
+        solr_password: nil,
         batch_size: 25
       ).ordered
 
       expect(described_class).to receive(:harvest).with(
-        csv_file: "/tmp/gencon/b.csv",
+        csv_file: File.expand_path("./csv/b.csv"),
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
+        solr_user: nil,
+        solr_password: nil,
         batch_size: 25
       ).ordered
 
       described_class.harvest_all(
-        directory: "/tmp/gencon",
+        directory: "./csv",
         pattern: "*.csv",
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
@@ -120,8 +178,34 @@ RSpec.describe GenconIndex::CLI do
         output: output
       )
 
-      expect(output.string).to include("process /tmp/gencon/a.csv")
-      expect(output.string).to include("process /tmp/gencon/b.csv")
+      expect(output.string).to include("process #{File.expand_path('./csv/a.csv')}")
+      expect(output.string).to include("process #{File.expand_path('./csv/b.csv')}")
+    end
+
+    it "passes Solr credentials through to each harvest call" do
+      output = StringIO.new
+
+      allow(Dir).to receive(:[]).with("./csv/*.csv").and_return(["./csv/a.csv"])
+
+      expect(described_class).to receive(:harvest).with(
+        csv_file: File.expand_path("./csv/a.csv"),
+        mapfile: "map.yml",
+        solr_url: "http://localhost:8983/solr",
+        solr_user: "user",
+        solr_password: "secret",
+        batch_size: 25
+      )
+
+      described_class.harvest_all(
+        directory: "./csv",
+        pattern: "*.csv",
+        mapfile: "map.yml",
+        solr_url: "http://localhost:8983/solr",
+        solr_user: "user",
+        solr_password: "secret",
+        batch_size: 25,
+        output: output
+      )
     end
   end
 end

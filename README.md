@@ -59,6 +59,24 @@ Send a commit to the configured Solr endpoint:
 
 `make load-data` ingests the CSV files in `./csv` into the local `gencon50-dev` collection.
 
+### Runtime configuration
+
+- `SOLR_URL` is the Solr endpoint used by `gencon_index` for harvest and commit operations.
+- `SOLR_USER` and `SOLR_PASSWORD` are used for HTTP basic auth by `make load-data`, `make commit`, and the `gencon_index` CLI when they are set.
+- `GENCON_TEMP_PATH` overrides the default directory used by `bundle exec gencon_index harvest_all`.
+
+If `SOLR_URL` does not already include credentials and `SOLR_USER` is set, the CLI injects `SOLR_USER` and `SOLR_PASSWORD` into the Solr connection automatically.
+
+`bundle exec gencon_index harvest_all` uses these defaults unless flags override them:
+
+- `--directory`: `GENCON_TEMP_PATH` when set, otherwise `./csv`
+- `--pattern`: `*.csv`
+- `--mapfile`: `solr_map.yml`
+
+Example:
+
+    GENCON_TEMP_PATH=/tmp/gencon bundle exec gencon_index harvest_all
+
 ### Use an external SolrCloud
 
 For a separate SolrCloud instance, such as `ansible-playbook-solrcloud`, start from the external-cluster example env file:
@@ -69,7 +87,7 @@ Update the values in `.env` for the target cluster:
 
 - `SOLR_SCHEME` should match the target SolrCloud protocol when it is not `http`.
 - `SOLR_HOSTNAME` should be the hostname for the target SolrCloud instance.
-- `SOLR_USER` and `SOLR_PASSWORD` are used by `make load-data` for authenticated Solr admin requests.
+- `SOLR_USER` and `SOLR_PASSWORD` are used for authenticated Solr admin and update requests.
 - `SOLR_HOST` should remain credential-free base Solr host and port.
 - `SOLR_URL` is the endpoint used by the CLI for ingest/commit.
 - `SOLR_PORT` should match the published Solr port for that environment.
@@ -91,7 +109,7 @@ Run the executable directly from the repo
 
     bundle exec gencon_index help
 
-`make load-data` uses `SOLR_USER` / `SOLR_PASSWORD` for Solr admin requests, but `make commit` and the `gencon_index` CLI use `SOLR_URL`. If your target Solr requires authentication for update requests, configure `SOLR_URL` so it is usable by the CLI in that environment.
+`make load-data`, `make commit`, and the `gencon_index` CLI use `SOLR_USER` / `SOLR_PASSWORD` for HTTP basic auth when they are set. `SOLR_URL` should remain the target Solr endpoint for ingest and commit requests.
 
 ## Commands
 
@@ -116,7 +134,13 @@ with the path to the file to upload.
 
 ### Harvest all CSV files from a directory
 
-    bundle exec gencon_index harvest_all --directory=./csv --pattern='*.csv' --mapfile=solr_map.yml
+    bundle exec gencon_index harvest_all
+
+Defaults:
+
+- `--directory` uses `GENCON_TEMP_PATH` when set, otherwise `./csv`
+- `--pattern` defaults to `*.csv`
+- `--mapfile` defaults to `solr_map.yml`
 
 For the repo’s standard local workflow, use `make load-data`.
 

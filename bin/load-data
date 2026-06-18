@@ -70,4 +70,4 @@ fi
 curl "${curl_args[@]}" \
   "${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=${SOLR_ALIAS}&collections=${SOLR_COLLECTION}"
 
-SOLR_URL="${SOLR_URL}" bundle exec gencon_index harvest_all --directory=./csv --pattern='*.csv' --mapfile=solr_map.yml
+SOLR_URL="${SOLR_URL}" bundle exec gencon_index harvest_all
