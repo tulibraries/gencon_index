@@ -12,7 +12,7 @@ date: 2025-03-18
 
 ## Requirements
 
-Requires Ruby 3.4.0+
+Requires Ruby.  Version specified in `.ruby-version` file.
 
 This indexer targets SolrCloud. A local SolrCloud is included in this repo via
 `docker-compose.yml` and the Solr configset in `solr/gencon50-solr`.
