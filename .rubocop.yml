@@ -1,8 +1,8 @@
 AllCops:
-  NewCops: enable
   TargetRubyVersion: 3.4
   UseCache: false
   SuggestExtensions: false
+  DisabledByDefault: true
   Exclude:
     - bin/**
     - '**/vendor/**/*'
@@ -11,6 +11,7 @@ Style/Documentation:
   Enabled: false
 
 Style/StringLiterals:
+  Enabled: true
   EnforcedStyle: double_quotes
 
 Style/WordArray:
@@ -20,11 +21,14 @@ Bundler/OrderedGems:
   Enabled: false
 
 Metrics/BlockLength:
+  Enabled: true
   Exclude:
     - spec/**/*
 
 Metrics/MethodLength:
+  Enabled: true
   Max: 25
 
 Metrics/AbcSize:
+  Enabled: true
   Max: 30
