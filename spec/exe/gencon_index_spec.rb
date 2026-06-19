@@ -81,6 +81,20 @@ RSpec.describe GenconIndex::App do
       run_command("harvest_all")
     end
 
+    it "uses SOLR_URL for harvest_all when no CLI options are given" do
+      ENV["SOLR_URL"] = "http://localhost:8983/solr"
+
+      expect(GenconIndex::CLI).to receive(:harvest_all).with(
+        directory: "./csv",
+        pattern: "*.csv",
+        mapfile: "solr_map.yml",
+        solr_url: "http://localhost:8983/solr",
+        batch_size: 100
+      )
+
+      run_command("harvest_all")
+    end
+
     it "dispatches the makemap command" do
       expect(GenconIndex::CLI).to receive(:makemap).with(
         csv_file: "input.csv",
@@ -106,6 +120,16 @@ RSpec.describe GenconIndex::App do
       )
 
       run_command("commit", "--solr-url=http://localhost:8983/solr")
+    end
+
+    it "uses SOLR_URL for commit when no CLI options are given" do
+      ENV["SOLR_URL"] = "http://localhost:8983/solr"
+
+      expect(GenconIndex::CLI).to receive(:commit).with(
+        solr_url: "http://localhost:8983/solr"
+      )
+
+      run_command("commit")
     end
 
     it "surfaces harvest errors instead of silently swallowing them" do

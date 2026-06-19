@@ -62,10 +62,10 @@ Send a commit to the configured Solr endpoint:
 ### Runtime configuration
 
 - `SOLR_URL` is the Solr endpoint used by `gencon_index` for harvest and commit operations.
-- `SOLR_USER` and `SOLR_PASSWORD` are used for HTTP basic auth by `make load-data`, `make commit`, and the `gencon_index` CLI when they are set.
+- `SOLR_AUTH_USER` and `SOLR_AUTH_PASSWORD` are used for HTTP basic auth by `make load-data`, `make commit`, and the `gencon_index` CLI when they are set.
 - `GENCON_TEMP_PATH` overrides the default directory used by `bundle exec gencon_index harvest_all`.
 
-If `SOLR_URL` does not already include credentials and `SOLR_USER` is set, the CLI injects `SOLR_USER` and `SOLR_PASSWORD` into the Solr connection automatically.
+If `SOLR_URL` does not already include credentials and `SOLR_AUTH_USER` is set, the CLI injects `SOLR_AUTH_USER` and `SOLR_AUTH_PASSWORD` into the Solr connection automatically.
 
 `bundle exec gencon_index harvest_all` uses these defaults unless flags override them:
 
@@ -87,18 +87,20 @@ Update the values in `.env` for the target cluster:
 
 - `SOLR_SCHEME` should match the target SolrCloud protocol when it is not `http`.
 - `SOLR_HOSTNAME` should be the hostname for the target SolrCloud instance.
-- `SOLR_USER` and `SOLR_PASSWORD` are used for authenticated Solr admin and update requests.
+- `SOLR_AUTH_USER` and `SOLR_AUTH_PASSWORD` are used for authenticated Solr admin and update requests.
 - `SOLR_HOST` should remain credential-free base Solr host and port.
 - `SOLR_URL` is the endpoint used by the CLI for ingest/commit.
 - `SOLR_PORT` should match the published Solr port for that environment.
 - `SOLR_COLLECTION` should be the target collection or alias name.
 
-`make load-data` uses `SOLR_HOST` for Solr admin endpoints and passes `SOLR_USER` / `SOLR_PASSWORD` separately for HTTP basic auth when they are set.
+`make load-data` uses `SOLR_HOST` for Solr admin endpoints and passes `SOLR_AUTH_USER` / `SOLR_AUTH_PASSWORD` separately for HTTP basic auth when they are set.
 
 Example:
 
     SOLR_SCHEME=http
     SOLR_HOSTNAME=solrcloud.example.org
+    SOLR_AUTH_USER=solr
+    SOLR_AUTH_PASSWORD=changeme
     SOLR_HOST=${SOLR_SCHEME}://${SOLR_HOSTNAME}:${SOLR_PORT}
     SOLR_COLLECTION=gencon50-v3.0.1
     SOLR_URL=${SOLR_HOST}/solr/${SOLR_COLLECTION}
@@ -109,7 +111,7 @@ Run the executable directly from the repo
 
     bundle exec gencon_index help
 
-`make load-data`, `make commit`, and the `gencon_index` CLI use `SOLR_USER` / `SOLR_PASSWORD` for HTTP basic auth when they are set. `SOLR_URL` should remain the target Solr endpoint for ingest and commit requests.
+`make load-data`, `make commit`, and the `gencon_index` CLI use `SOLR_AUTH_USER` / `SOLR_AUTH_PASSWORD` for HTTP basic auth when they are set. `SOLR_URL` should remain the target Solr endpoint for ingest and commit requests.
 
 ## Commands
 

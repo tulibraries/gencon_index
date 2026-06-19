@@ -10,7 +10,8 @@ module GenconIndex
     module_function
 
     def harvest(csv_file:, mapfile: "solr_map.yml", solr_url: ENV.fetch("SOLR_URL", nil),
-                solr_user: ENV.fetch("SOLR_USER", nil), solr_password: ENV.fetch("SOLR_PASSWORD", nil),
+                solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
+                solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil),
                 batch_size: 100)
       GenconIndex::HarvestCSV.harvest(
         csv_file,
@@ -23,8 +24,8 @@ module GenconIndex
     # rubocop:disable Metrics/ParameterLists
     def harvest_all(directory: ENV.fetch("GENCON_TEMP_PATH", "./csv"), pattern: "*.csv", mapfile: "solr_map.yml",
                     solr_url: ENV.fetch("SOLR_URL", nil),
-                    solr_user: ENV.fetch("SOLR_USER", nil),
-                    solr_password: ENV.fetch("SOLR_PASSWORD", nil),
+                    solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
+                    solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil),
                     batch_size: 100,
                     output: $stdout)
       Dir[File.join(directory, pattern)].each do |file_name|
@@ -54,8 +55,8 @@ module GenconIndex
     end
 
     def commit(solr_url: ENV.fetch("SOLR_URL", nil),
-               solr_user: ENV.fetch("SOLR_USER", nil),
-               solr_password: ENV.fetch("SOLR_PASSWORD", nil))
+               solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
+               solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil))
       RSolr.connect(url: solr_url_with_auth(solr_url, solr_user, solr_password)).commit
     end
 
