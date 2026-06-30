@@ -24,8 +24,11 @@ RSpec.describe GenconIndex::CLI do
 
   describe ".harvest" do
     it "delegates to HarvestCSV with provided options" do
+      solr_client = instance_double(RSolr::Client)
+      allow(described_class).to receive(:solr_client).and_return(solr_client)
+
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
-        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250)
+        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250, solr: solr_client)
 
       described_class.harvest(
         csv_file: "data.csv",
@@ -35,12 +38,14 @@ RSpec.describe GenconIndex::CLI do
       )
     end
 
-    it "adds basic auth credentials from SOLR_AUTH_USER and SOLR_AUTH_PASSWORD" do
+    it "passes a separate authenticated Solr client when auth vars are present" do
       ENV["SOLR_AUTH_USER"] = "user"
       ENV["SOLR_AUTH_PASSWORD"] = "secret"
+      solr_client = instance_double(RSolr::Client)
+      allow(described_class).to receive(:solr_client).and_return(solr_client)
 
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
-        .with("data.csv", "map.yml", "http://user:secret@localhost:8983/solr", 250)
+        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250, solr: solr_client)
 
       described_class.harvest(
         csv_file: "data.csv",
@@ -120,16 +125,65 @@ RSpec.describe GenconIndex::CLI do
       expect(solr_client).to have_received(:commit)
     end
 
-    it "sends commit requests with basic auth credentials from SOLR_AUTH_USER and SOLR_AUTH_PASSWORD" do
+    it "uses a separate authenticated Solr client when auth vars are present" do
       ENV["SOLR_AUTH_USER"] = "user"
       ENV["SOLR_AUTH_PASSWORD"] = "secret"
       solr_client = instance_double(RSolr::Client)
-      allow(RSolr).to receive(:connect).with(url: "http://user:secret@localhost:8983/solr").and_return(solr_client)
+      allow(RSolr).to receive(:connect)
+        .with(instance_of(Faraday::Connection), url: "http://localhost:8983/solr")
+        .and_return(solr_client)
       allow(solr_client).to receive(:commit)
 
       described_class.commit(solr_url: "http://localhost:8983/solr")
 
       expect(solr_client).to have_received(:commit)
+    end
+
+    it "keeps the password out of SOLR_URL and does not raise for URI-sensitive characters" do
+      solr_client = instance_double(RSolr::Client, commit: true)
+      allow(RSolr).to receive(:connect).and_return(solr_client)
+
+      expect do
+        described_class.commit(
+          solr_url: "http://localhost:8983/solr",
+          solr_user: "user",
+          solr_password: "@:/?#%[]"
+        )
+      end.not_to raise_error
+
+      expect(RSolr).to have_received(:connect)
+        .with(instance_of(Faraday::Connection), url: "http://localhost:8983/solr")
+    end
+  end
+
+  describe ".solr_client" do
+    it "uses the credential-free SOLR_URL when auth vars are absent" do
+      solr_client = instance_double(RSolr::Client)
+      allow(RSolr).to receive(:connect).with(url: "http://localhost:8983/solr").and_return(solr_client)
+
+      expect(described_class.solr_client("http://localhost:8983/solr", nil, nil)).to eq(solr_client)
+    end
+
+    it "uses a separate Faraday connection for simple basic auth credentials" do
+      solr_client = instance_double(RSolr::Client)
+      allow(RSolr).to receive(:connect)
+        .with(instance_of(Faraday::Connection), url: "http://localhost:8983/solr")
+        .and_return(solr_client)
+
+      expect(
+        described_class.solr_client("http://localhost:8983/solr", "user", "secret")
+      ).to eq(solr_client)
+    end
+
+    it "does not interpolate URI-sensitive passwords into SOLR_URL" do
+      solr_client = instance_double(RSolr::Client)
+      allow(RSolr).to receive(:connect)
+        .with(instance_of(Faraday::Connection), url: "http://localhost:8983/solr")
+        .and_return(solr_client)
+
+      expect do
+        described_class.solr_client("http://localhost:8983/solr", "user", "@:/?#%[]")
+      end.not_to raise_error
     end
   end
 

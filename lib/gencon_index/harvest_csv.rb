@@ -37,7 +37,8 @@ module GenconIndex
     def harvest(csv_source,
                 map_source = "solr_map.yml",
                 solr_endpoint = ENV.fetch("SOLR_URL", nil),
-                batch_size = 100)
+                batch_size = 100,
+                solr: nil)
       logger = Logger.new($stdout)
       logger.info("Batch size = #{batch_size}")
       schema_map = YAML.load_file(map_source)
@@ -45,7 +46,7 @@ module GenconIndex
       csv = CSV.read(csv_source, headers: true, encoding: "utf-8")
 
       progressbar = ProgressBar.create(title: "Harvest ", total: csv.count, format: "%t (%c/%C) %a |%B|")
-      solr = RSolr.connect url: solr_endpoint
+      solr ||= RSolr.connect(url: solr_endpoint)
       csv.each_slice(batch_size) do |batch|
         document_batch = batch.map do |item|
           progressbar.increment

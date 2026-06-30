@@ -2,7 +2,6 @@
 
 require "dotenv/load"
 require "rsolr"
-require "uri"
 require_relative "harvest_csv"
 
 module GenconIndex
@@ -16,8 +15,9 @@ module GenconIndex
       GenconIndex::HarvestCSV.harvest(
         csv_file,
         mapfile,
-        solr_url_with_auth(solr_url, solr_user, solr_password),
-        batch_size
+        solr_url,
+        batch_size,
+        solr: solr_client(solr_url, solr_user, solr_password)
       )
     end
 
@@ -57,18 +57,29 @@ module GenconIndex
     def commit(solr_url: ENV.fetch("SOLR_URL", nil),
                solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
                solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil))
-      RSolr.connect(url: solr_url_with_auth(solr_url, solr_user, solr_password)).commit
+      solr_client(solr_url, solr_user, solr_password).commit
     end
 
-    def solr_url_with_auth(solr_url, solr_user, solr_password)
-      return solr_url if solr_url.nil? || solr_user.to_s.empty?
+    def solr_client(solr_url, solr_user, solr_password)
+      return RSolr.connect(url: solr_url) if solr_url.nil? || solr_user.to_s.empty?
 
-      uri = URI.parse(solr_url)
-      return solr_url if uri.user
+      RSolr.connect(solr_connection(solr_user, solr_password), url: solr_url)
+    end
 
-      uri.user = solr_user
-      uri.password = solr_password
-      uri.to_s
+    def solr_connection(solr_user, solr_password)
+      Faraday.new(request: { params_encoder: Faraday::FlatParamsEncoder }) do |conn|
+        case Faraday::VERSION
+        when /^0/
+          conn.basic_auth solr_user, solr_password
+        when /^1/
+          conn.request :basic_auth, solr_user, solr_password
+        else
+          conn.request :authorization, :basic_auth, solr_user, solr_password
+        end
+
+        conn.response :raise_error
+        conn.adapter Faraday.default_adapter || :net_http
+      end
     end
   end
 end
