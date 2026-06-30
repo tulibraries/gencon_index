@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "dotenv/load"
+require "faraday"
 require "rsolr"
 require_relative "harvest_csv"
 
@@ -74,7 +75,7 @@ module GenconIndex
         when /^1/
           conn.request :basic_auth, solr_user, solr_password
         else
-          conn.request :authorization, :basic_auth, solr_user, solr_password
+          conn.request :authorization, :basic, solr_user, solr_password
         end
 
         conn.response :raise_error
