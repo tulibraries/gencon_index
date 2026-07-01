@@ -131,5 +131,6 @@ RSpec.describe GenconIndex::HarvestCSV do
         described_class.harvest(csv_path, map_path, solr_url, 500)
       end.to raise_error(StandardError, "add failed")
     end
+
   end
 end
