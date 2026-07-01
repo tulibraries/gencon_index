@@ -123,5 +123,19 @@ RSpec.describe GenconIndex::HarvestCSV do
         described_class.harvest(csv_path, map_path, solr_url, 500)
       end.to raise_error(StandardError, "add failed")
     end
+
+    it "uses an injected Solr client when provided" do
+      injected_solr_client = instance_double(RSolr::Client, add: nil, commit: nil)
+
+      expect(RSolr).not_to receive(:connect)
+
+      described_class.harvest(
+        csv_path,
+        map_path,
+        solr_url,
+        500,
+        solr_client: injected_solr_client
+      )
+    end
   end
 end

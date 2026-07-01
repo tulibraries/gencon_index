@@ -24,8 +24,13 @@ RSpec.describe GenconIndex::CLI do
 
   describe ".harvest" do
     it "delegates to HarvestCSV with provided options" do
+      solr_client = instance_double(RSolr::Client)
+      allow(GenconIndex::SolrConfig).to receive(:client)
+        .with("http://localhost:8983/solr", nil, nil)
+        .and_return(solr_client)
+
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
-        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250)
+        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250, solr_client: solr_client)
 
       described_class.harvest(
         csv_file: "data.csv",
@@ -35,12 +40,17 @@ RSpec.describe GenconIndex::CLI do
       )
     end
 
-    it "adds basic auth credentials from SOLR_AUTH_USER and SOLR_AUTH_PASSWORD" do
+    it "builds the Solr client with basic auth credentials from SOLR_AUTH_USER and SOLR_AUTH_PASSWORD" do
       ENV["SOLR_AUTH_USER"] = "user"
       ENV["SOLR_AUTH_PASSWORD"] = "secret"
+      solr_client = instance_double(RSolr::Client)
+
+      allow(GenconIndex::SolrConfig).to receive(:client)
+        .with("http://localhost:8983/solr", "user", "secret")
+        .and_return(solr_client)
 
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
-        .with("data.csv", "map.yml", "http://user:secret@localhost:8983/solr", 250)
+        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250, solr_client: solr_client)
 
       described_class.harvest(
         csv_file: "data.csv",
@@ -57,7 +67,9 @@ RSpec.describe GenconIndex::CLI do
       progress_bar = instance_double(ProgressBar::Base)
       added_documents = []
 
-      allow(RSolr).to receive(:connect).with(url: "http://localhost:8983/solr").and_return(solr_client)
+      allow(GenconIndex::SolrConfig).to receive(:client)
+        .with("http://localhost:8983/solr", nil, nil)
+        .and_return(solr_client)
       allow(solr_client).to receive(:commit)
       allow(solr_client).to receive(:add) do |batch|
         added_documents.concat(batch)
@@ -110,22 +122,11 @@ RSpec.describe GenconIndex::CLI do
   end
 
   describe ".commit" do
-    it "sends a commit to the configured Solr endpoint" do
-      solr_client = instance_double(RSolr::Client)
-      allow(RSolr).to receive(:connect).with(url: "http://localhost:8983/solr").and_return(solr_client)
-      allow(solr_client).to receive(:commit)
-
-      described_class.commit(solr_url: "http://localhost:8983/solr")
-
-      expect(solr_client).to have_received(:commit)
-    end
-
-    it "sends commit requests with basic auth credentials from SOLR_AUTH_USER and SOLR_AUTH_PASSWORD" do
-      ENV["SOLR_AUTH_USER"] = "user"
-      ENV["SOLR_AUTH_PASSWORD"] = "secret"
-      solr_client = instance_double(RSolr::Client)
-      allow(RSolr).to receive(:connect).with(url: "http://user:secret@localhost:8983/solr").and_return(solr_client)
-      allow(solr_client).to receive(:commit)
+    it "commits using the Solr client from SolrConfig" do
+      solr_client = instance_double(RSolr::Client, commit: nil)
+      allow(GenconIndex::SolrConfig).to receive(:client)
+        .with("http://localhost:8983/solr", nil, nil)
+        .and_return(solr_client)
 
       described_class.commit(solr_url: "http://localhost:8983/solr")
 

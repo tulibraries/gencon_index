@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "dotenv/load"
-require "rsolr"
-require "uri"
 require_relative "harvest_csv"
 
 module GenconIndex
@@ -16,8 +14,9 @@ module GenconIndex
       GenconIndex::HarvestCSV.harvest(
         csv_file,
         mapfile,
-        solr_url_with_auth(solr_url, solr_user, solr_password),
-        batch_size
+        solr_url,
+        batch_size,
+        solr_client: GenconIndex::SolrConfig.client(solr_url, solr_user, solr_password)
       )
     end
 
@@ -57,18 +56,7 @@ module GenconIndex
     def commit(solr_url: ENV.fetch("SOLR_URL", nil),
                solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
                solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil))
-      RSolr.connect(url: solr_url_with_auth(solr_url, solr_user, solr_password)).commit
-    end
-
-    def solr_url_with_auth(solr_url, solr_user, solr_password)
-      return solr_url if solr_url.nil? || solr_user.to_s.empty?
-
-      uri = URI.parse(solr_url)
-      return solr_url if uri.user
-
-      uri.user = solr_user
-      uri.password = solr_password
-      uri.to_s
+      GenconIndex::SolrConfig.client(solr_url, solr_user, solr_password).commit
     end
   end
 end
