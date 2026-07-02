@@ -110,6 +110,14 @@ RSpec.describe GenconIndex::HarvestCSV do
       expect(progress_bar).to have_received(:increment).at_least(:once)
     end
 
+    it "uses a provided Solr client without reconnecting" do
+      allow(RSolr).to receive(:connect)
+
+      described_class.harvest(csv_path, map_path, solr_url, 500, solr: solr_client)
+
+      expect(RSolr).not_to have_received(:connect)
+    end
+
     it "does not create threads during harvest" do
       expect(Thread).not_to receive(:new)
 
@@ -123,5 +131,6 @@ RSpec.describe GenconIndex::HarvestCSV do
         described_class.harvest(csv_path, map_path, solr_url, 500)
       end.to raise_error(StandardError, "add failed")
     end
+
   end
 end

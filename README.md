@@ -65,8 +65,6 @@ Send a commit to the configured Solr endpoint:
 - `SOLR_AUTH_USER` and `SOLR_AUTH_PASSWORD` are used for HTTP basic auth by `make load-data`, `make commit`, and the `gencon_index` CLI when they are set.
 - `GENCON_TEMP_PATH` overrides the default directory used by `bundle exec gencon_index harvest_all`.
 
-If `SOLR_URL` does not already include credentials and `SOLR_AUTH_USER` is set, the CLI injects `SOLR_AUTH_USER` and `SOLR_AUTH_PASSWORD` into the Solr connection automatically.
-
 `bundle exec gencon_index harvest_all` uses these defaults unless flags override them:
 
 - `--directory`: `GENCON_TEMP_PATH` when set, otherwise `./csv`
