@@ -7,17 +7,21 @@ require_relative "../../lib/gencon_index"
 RSpec.describe GenconIndex::CLI do
   around do |example|
     original_gencon_temp_path = ENV["GENCON_TEMP_PATH"]
+    original_solr_url = ENV["SOLR_URL"]
     original_solr_user = ENV["SOLR_AUTH_USER"]
     original_solr_password = ENV["SOLR_AUTH_PASSWORD"]
     ENV.delete("GENCON_TEMP_PATH")
+    ENV.delete("SOLR_URL")
     ENV.delete("SOLR_AUTH_USER")
     ENV.delete("SOLR_AUTH_PASSWORD")
     example.run
   ensure
     ENV["GENCON_TEMP_PATH"] = original_gencon_temp_path if original_gencon_temp_path
+    ENV["SOLR_URL"] = original_solr_url if original_solr_url
     ENV["SOLR_AUTH_USER"] = original_solr_user if original_solr_user
     ENV["SOLR_AUTH_PASSWORD"] = original_solr_password if original_solr_password
     ENV.delete("GENCON_TEMP_PATH") unless original_gencon_temp_path
+    ENV.delete("SOLR_URL") unless original_solr_url
     ENV.delete("SOLR_AUTH_USER") unless original_solr_user
     ENV.delete("SOLR_AUTH_PASSWORD") unless original_solr_password
   end
@@ -38,6 +42,18 @@ RSpec.describe GenconIndex::CLI do
         solr_url: "http://localhost:8983/solr",
         batch_size: 250
       )
+    end
+
+    it "leaves Solr URL resolution to SolrConfig when no URL is passed" do
+      solr_client = instance_double(RSolr::Client)
+      allow(GenconIndex::SolrConfig).to receive(:client)
+        .with(nil)
+        .and_return(solr_client)
+
+      expect(GenconIndex::HarvestCSV).to receive(:harvest)
+        .with("data.csv", "solr_map.yml", nil, 100, solr: solr_client)
+
+      described_class.harvest(csv_file: "data.csv")
     end
 
     it "uses the checked-in solr_map.yml by default during harvest" do
@@ -112,13 +128,24 @@ RSpec.describe GenconIndex::CLI do
 
       expect(solr_client).to have_received(:commit)
     end
+
+    it "leaves Solr URL resolution to SolrConfig when no URL is passed" do
+      solr_client = instance_double(RSolr::Client, commit: nil)
+      allow(GenconIndex::SolrConfig).to receive(:client)
+        .with(nil)
+        .and_return(solr_client)
+
+      described_class.commit
+
+      expect(solr_client).to have_received(:commit)
+    end
   end
 
   describe ".harvest_all" do
     it "defaults the directory from GENCON_TEMP_PATH when set" do
-      ENV["GENCON_TEMP_PATH"] = "/tmp/gencon"
       output = StringIO.new
 
+      allow(GenconIndex::SolrConfig).to receive(:directory).with(nil).and_return("/tmp/gencon")
       allow(Dir).to receive(:[]).with("/tmp/gencon/*.csv").and_return([])
 
       described_class.harvest_all(output: output)
@@ -130,6 +157,7 @@ RSpec.describe GenconIndex::CLI do
       allow(Dir).to receive(:[]).with("./csv/*.csv").and_return(
         ["./csv/a.csv", "./csv/b.csv"]
       )
+      allow(GenconIndex::SolrConfig).to receive(:directory).with("./csv").and_return("./csv")
 
       expect(described_class).to receive(:harvest).with(
         csv_file: File.expand_path("./csv/a.csv"),
@@ -158,10 +186,11 @@ RSpec.describe GenconIndex::CLI do
       expect(output.string).to include("process #{File.expand_path('./csv/b.csv')}")
     end
 
-    it "passes Solr credentials through to each harvest call" do
+    it "passes Solr URL through to each harvest call" do
       output = StringIO.new
 
       allow(Dir).to receive(:[]).with("./csv/*.csv").and_return(["./csv/a.csv"])
+      allow(GenconIndex::SolrConfig).to receive(:directory).with("./csv").and_return("./csv")
 
       expect(described_class).to receive(:harvest).with(
         csv_file: File.expand_path("./csv/a.csv"),

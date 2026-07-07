@@ -7,11 +7,14 @@ module GenconIndex
   module SolrConfig
     module_function
 
-    def client(
-      solr_url,
-      solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
-      solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil)
-    )
+    def directory(path = nil)
+      path || ENV["GENCON_TEMP_PATH"] || "./csv"
+    end
+
+    def client(solr_url = nil, solr_user = nil, solr_password = nil)
+      solr_url ||= ENV["SOLR_URL"]
+      solr_user ||= ENV["SOLR_AUTH_USER"]
+      solr_password ||= ENV["SOLR_AUTH_PASSWORD"]
       return RSolr.connect(url: solr_url) if solr_url.nil? || solr_user.to_s.empty?
 
       RSolr.connect(connection(solr_user, solr_password), url: solr_url)

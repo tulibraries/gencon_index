@@ -8,7 +8,7 @@ module GenconIndex
   module CLI
     module_function
 
-    def harvest(csv_file:, mapfile: "solr_map.yml", solr_url: ENV.fetch("SOLR_URL", nil), batch_size: 100)
+    def harvest(csv_file:, mapfile: "solr_map.yml", solr_url: nil, batch_size: 100)
       GenconIndex::HarvestCSV.harvest(
         csv_file,
         mapfile,
@@ -19,10 +19,11 @@ module GenconIndex
     end
 
     # rubocop:disable Metrics/ParameterLists
-    def harvest_all(directory: ENV.fetch("GENCON_TEMP_PATH", "./csv"), pattern: "*.csv", mapfile: "solr_map.yml",
-                    solr_url: ENV.fetch("SOLR_URL", nil),
+    def harvest_all(directory: nil, pattern: "*.csv", mapfile: "solr_map.yml",
+                    solr_url: nil,
                     batch_size: 100,
                     output: $stdout)
+      directory = GenconIndex::SolrConfig.directory(directory)
       Dir[File.join(directory, pattern)].each do |file_name|
         file_path = File.expand_path(file_name)
         output.puts("process #{file_path}")
@@ -47,7 +48,7 @@ module GenconIndex
       GenconIndex::HarvestCSV.blacklight(mapfile, output)
     end
 
-    def commit(solr_url: ENV.fetch("SOLR_URL", nil))
+    def commit(solr_url: nil)
       GenconIndex::SolrConfig.client(solr_url).commit
     end
   end

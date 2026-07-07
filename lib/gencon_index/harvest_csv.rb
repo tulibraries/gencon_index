@@ -6,6 +6,7 @@ require "yaml"
 require "ruby-progressbar"
 require "logger"
 require "active_support/core_ext/string/inflections"
+require_relative "solr_config"
 
 module GenconIndex
   module HarvestCSV
@@ -36,7 +37,7 @@ module GenconIndex
 
     def harvest(csv_source,
                 map_source = "solr_map.yml",
-                solr_endpoint = ENV.fetch("SOLR_URL", nil),
+                solr_endpoint = nil,
                 batch_size = 100,
                 solr: nil)
       logger = Logger.new($stdout)
@@ -46,7 +47,7 @@ module GenconIndex
       csv = CSV.read(csv_source, headers: true, encoding: "utf-8")
 
       progressbar = ProgressBar.create(title: "Harvest ", total: csv.count, format: "%t (%c/%C) %a |%B|")
-      solr ||= RSolr.connect(url: solr_endpoint)
+      solr ||= GenconIndex::SolrConfig.client(solr_endpoint)
       csv.each_slice(batch_size) do |batch|
         document_batch = batch.map do |item|
           progressbar.increment

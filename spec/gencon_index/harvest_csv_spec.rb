@@ -80,7 +80,7 @@ RSpec.describe GenconIndex::HarvestCSV do
     let(:progress_bar) { instance_double(ProgressBar::Base) }
 
     before do
-      allow(RSolr).to receive(:connect).and_return(solr_client)
+      allow(GenconIndex::SolrConfig).to receive(:client).and_return(solr_client)
       allow(solr_client).to receive(:add)
       allow(solr_client).to receive(:commit)
       allow(ProgressBar).to receive(:create).and_return(progress_bar)
@@ -111,11 +111,17 @@ RSpec.describe GenconIndex::HarvestCSV do
     end
 
     it "uses a provided Solr client without reconnecting" do
-      allow(RSolr).to receive(:connect)
+      allow(GenconIndex::SolrConfig).to receive(:client)
 
       described_class.harvest(csv_path, map_path, solr_url, 500, solr: solr_client)
 
-      expect(RSolr).not_to have_received(:connect)
+      expect(GenconIndex::SolrConfig).not_to have_received(:client)
+    end
+
+    it "builds a Solr client through SolrConfig when one is not provided" do
+      described_class.harvest(csv_path, map_path, nil, 500)
+
+      expect(GenconIndex::SolrConfig).to have_received(:client).with(nil)
     end
 
     it "does not create threads during harvest" do
