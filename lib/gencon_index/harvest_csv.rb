@@ -37,7 +37,6 @@ module GenconIndex
 
     def harvest(csv_source,
                 map_source = "solr_map.yml",
-                solr_endpoint = nil,
                 batch_size = 100,
                 solr: nil)
       logger = Logger.new($stdout)
@@ -47,7 +46,7 @@ module GenconIndex
       csv = CSV.read(csv_source, headers: true, encoding: "utf-8")
 
       progressbar = ProgressBar.create(title: "Harvest ", total: csv.count, format: "%t (%c/%C) %a |%B|")
-      solr ||= GenconIndex::SolrConfig.client(solr_endpoint)
+      solr ||= GenconIndex::SolrConfig.client
       csv.each_slice(batch_size) do |batch|
         document_batch = batch.map do |item|
           progressbar.increment

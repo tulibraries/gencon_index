@@ -12,7 +12,6 @@ module GenconIndex
       GenconIndex::HarvestCSV.harvest(
         csv_file,
         mapfile,
-        solr_url,
         batch_size,
         solr: GenconIndex::SolrConfig.client(solr_url)
       )

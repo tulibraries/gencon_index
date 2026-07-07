@@ -75,7 +75,6 @@ RSpec.describe GenconIndex::HarvestCSV do
   describe ".harvest" do
     let(:map_path) { SPEC_FIXTURES_DIR.join("solr_map.yml") }
     let(:csv_path) { SPEC_FIXTURES_DIR.join("1980.csv") }
-    let(:solr_url) { "http://example.com/solr" }
     let(:solr_client) { instance_double(RSolr::Client) }
     let(:progress_bar) { instance_double(ProgressBar::Base) }
 
@@ -95,7 +94,7 @@ RSpec.describe GenconIndex::HarvestCSV do
       end
       expect(solr_client).to receive(:commit).ordered
 
-      described_class.harvest(csv_path, map_path, solr_url, 500)
+      described_class.harvest(csv_path, map_path, 500)
 
       flattened_documents = added_batches.flatten
 
@@ -113,28 +112,28 @@ RSpec.describe GenconIndex::HarvestCSV do
     it "uses a provided Solr client without reconnecting" do
       allow(GenconIndex::SolrConfig).to receive(:client)
 
-      described_class.harvest(csv_path, map_path, solr_url, 500, solr: solr_client)
+      described_class.harvest(csv_path, map_path, 500, solr: solr_client)
 
       expect(GenconIndex::SolrConfig).not_to have_received(:client)
     end
 
     it "builds a Solr client through SolrConfig when one is not provided" do
-      described_class.harvest(csv_path, map_path, nil, 500)
+      described_class.harvest(csv_path, map_path, 500)
 
-      expect(GenconIndex::SolrConfig).to have_received(:client).with(nil)
+      expect(GenconIndex::SolrConfig).to have_received(:client).with(no_args)
     end
 
     it "does not create threads during harvest" do
       expect(Thread).not_to receive(:new)
 
-      described_class.harvest(csv_path, map_path, solr_url, 500)
+      described_class.harvest(csv_path, map_path, 500)
     end
 
     it "raises errors from solr.add" do
       allow(solr_client).to receive(:add).and_raise(StandardError, "add failed")
 
       expect do
-        described_class.harvest(csv_path, map_path, solr_url, 500)
+        described_class.harvest(csv_path, map_path, 500)
       end.to raise_error(StandardError, "add failed")
     end
 

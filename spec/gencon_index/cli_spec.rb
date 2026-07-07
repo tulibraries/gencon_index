@@ -34,7 +34,7 @@ RSpec.describe GenconIndex::CLI do
         .and_return(solr_client)
 
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
-        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250, solr: solr_client)
+        .with("data.csv", "map.yml", 250, solr: solr_client)
 
       described_class.harvest(
         csv_file: "data.csv",
@@ -51,7 +51,7 @@ RSpec.describe GenconIndex::CLI do
         .and_return(solr_client)
 
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
-        .with("data.csv", "solr_map.yml", nil, 100, solr: solr_client)
+        .with("data.csv", "solr_map.yml", 100, solr: solr_client)
 
       described_class.harvest(csv_file: "data.csv")
     end
