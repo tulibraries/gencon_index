@@ -7,7 +7,11 @@ module GenconIndex
   module SolrConfig
     module_function
 
-    def client(solr_url, solr_user, solr_password)
+    def client(
+      solr_url,
+      solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
+      solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil)
+    )
       return RSolr.connect(url: solr_url) if solr_url.nil? || solr_user.to_s.empty?
 
       RSolr.connect(connection(solr_user, solr_password), url: solr_url)

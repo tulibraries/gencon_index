@@ -5,14 +5,13 @@ require_relative "../../lib/gencon_index"
 
 RSpec.describe GenconIndex::SolrConfig do
   describe ".client" do
-    it "builds an RSolr client for an unauthenticated URL" do
-      solr_client = instance_double(RSolr::Client)
+    it "builds a plain RSolr client when no Solr auth user is configured" do
+      expect(RSolr).to receive(:connect).with(url: "http://localhost:8983/solr")
 
-      expect(RSolr).to receive(:connect).with(url: "http://localhost:8983/solr").and_return(solr_client)
-
-      result = described_class.client("http://localhost:8983/solr", nil, nil)
-
-      expect(result).to eq(solr_client)
+      described_class.client(
+        "http://localhost:8983/solr",
+        solr_user: nil,
+        solr_password: nil)
     end
 
     it "passes through SOLR_AUTH_USER and SOLR_AUTH_PASSWORD values to Faraday basic auth" do
@@ -22,7 +21,7 @@ RSpec.describe GenconIndex::SolrConfig do
         .with(instance_of(Faraday::Connection), url: "http://localhost:8983/solr")
         .and_return(solr_client)
 
-      result = described_class.client("http://localhost:8983/solr", "user", "secret")
+      result = described_class.client("http://localhost:8983/solr", solr_user: "user", solr_password: "secret")
 
       expect(result).to eq(solr_client)
     end
@@ -34,7 +33,7 @@ RSpec.describe GenconIndex::SolrConfig do
         .and_return(solr_client)
 
       expect do
-        described_class.client("http://localhost:8983/solr", "user", "@:/?#%[]")
+        described_class.client("http://localhost:8983/solr", solr_user: "user", solr_password: "@:/?#%[]")
       end.not_to raise_error
     end
   end

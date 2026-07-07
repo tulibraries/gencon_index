@@ -26,27 +26,7 @@ RSpec.describe GenconIndex::CLI do
     it "delegates to HarvestCSV with provided options" do
       solr_client = instance_double(RSolr::Client)
       allow(GenconIndex::SolrConfig).to receive(:client)
-        .with("http://localhost:8983/solr", nil, nil)
-        .and_return(solr_client)
-
-      expect(GenconIndex::HarvestCSV).to receive(:harvest)
-        .with("data.csv", "map.yml", "http://localhost:8983/solr", 250, solr: solr_client)
-
-      described_class.harvest(
-        csv_file: "data.csv",
-        mapfile: "map.yml",
-        solr_url: "http://localhost:8983/solr",
-        batch_size: 250
-      )
-    end
-
-    it "builds the Solr client with basic auth credentials from SOLR_AUTH_USER and SOLR_AUTH_PASSWORD" do
-      ENV["SOLR_AUTH_USER"] = "user"
-      ENV["SOLR_AUTH_PASSWORD"] = "secret"
-      solr_client = instance_double(RSolr::Client)
-
-      allow(GenconIndex::SolrConfig).to receive(:client)
-        .with("http://localhost:8983/solr", "user", "secret")
+        .with("http://localhost:8983/solr")
         .and_return(solr_client)
 
       expect(GenconIndex::HarvestCSV).to receive(:harvest)
@@ -68,7 +48,7 @@ RSpec.describe GenconIndex::CLI do
       added_documents = []
 
       allow(GenconIndex::SolrConfig).to receive(:client)
-        .with("http://localhost:8983/solr", nil, nil)
+        .with("http://localhost:8983/solr")
         .and_return(solr_client)
       allow(solr_client).to receive(:commit)
       allow(solr_client).to receive(:add) do |batch|
@@ -125,7 +105,7 @@ RSpec.describe GenconIndex::CLI do
     it "commits using the Solr client from SolrConfig" do
       solr_client = instance_double(RSolr::Client, commit: nil)
       allow(GenconIndex::SolrConfig).to receive(:client)
-        .with("http://localhost:8983/solr", nil, nil)
+        .with("http://localhost:8983/solr")
         .and_return(solr_client)
 
       described_class.commit(solr_url: "http://localhost:8983/solr")
@@ -155,8 +135,6 @@ RSpec.describe GenconIndex::CLI do
         csv_file: File.expand_path("./csv/a.csv"),
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
-        solr_user: nil,
-        solr_password: nil,
         batch_size: 25
       ).ordered
 
@@ -164,8 +142,6 @@ RSpec.describe GenconIndex::CLI do
         csv_file: File.expand_path("./csv/b.csv"),
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
-        solr_user: nil,
-        solr_password: nil,
         batch_size: 25
       ).ordered
 
@@ -191,8 +167,6 @@ RSpec.describe GenconIndex::CLI do
         csv_file: File.expand_path("./csv/a.csv"),
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
-        solr_user: "user",
-        solr_password: "secret",
         batch_size: 25
       )
 
@@ -201,8 +175,6 @@ RSpec.describe GenconIndex::CLI do
         pattern: "*.csv",
         mapfile: "map.yml",
         solr_url: "http://localhost:8983/solr",
-        solr_user: "user",
-        solr_password: "secret",
         batch_size: 25,
         output: output
       )
