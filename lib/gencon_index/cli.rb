@@ -8,7 +8,7 @@ module GenconIndex
   module CLI
     module_function
 
-    def harvest(csv_file:, mapfile: "solr_map.yml", solr_url: nil, batch_size: 100)
+    def harvest(csv_file:, mapfile: "solr_map.yml", batch_size: 100, solr_url: nil)
       GenconIndex::HarvestCSV.harvest(
         csv_file,
         mapfile,
@@ -19,8 +19,8 @@ module GenconIndex
 
     # rubocop:disable Metrics/ParameterLists
     def harvest_all(directory: nil, pattern: "*.csv", mapfile: "solr_map.yml",
-                    solr_url: nil,
                     batch_size: 100,
+                    solr_url: nil,
                     output: $stdout)
       directory = GenconIndex::SolrConfig.directory(directory)
       Dir[File.join(directory, pattern)].each do |file_name|
