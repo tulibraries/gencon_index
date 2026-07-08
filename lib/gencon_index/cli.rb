@@ -1,33 +1,28 @@
 # frozen_string_literal: true
 
 require "dotenv/load"
-require "rsolr"
-require "uri"
 require_relative "harvest_csv"
+require_relative "solr_config"
 
 module GenconIndex
   module CLI
     module_function
 
-    def harvest(csv_file:, mapfile: "solr_map.yml", solr_url: ENV.fetch("SOLR_URL", nil),
-                solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
-                solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil),
-                batch_size: 100)
+    def harvest(csv_file:, mapfile: "solr_map.yml", batch_size: 100, solr_url: nil)
       GenconIndex::HarvestCSV.harvest(
         csv_file,
         mapfile,
-        solr_url_with_auth(solr_url, solr_user, solr_password),
-        batch_size
+        batch_size,
+        solr: GenconIndex::SolrConfig.client(solr_url)
       )
     end
 
     # rubocop:disable Metrics/ParameterLists
-    def harvest_all(directory: ENV.fetch("GENCON_TEMP_PATH", "./csv"), pattern: "*.csv", mapfile: "solr_map.yml",
-                    solr_url: ENV.fetch("SOLR_URL", nil),
-                    solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
-                    solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil),
+    def harvest_all(directory: nil, pattern: "*.csv", mapfile: "solr_map.yml",
                     batch_size: 100,
+                    solr_url: nil,
                     output: $stdout)
+      directory = GenconIndex::SolrConfig.directory(directory)
       Dir[File.join(directory, pattern)].each do |file_name|
         file_path = File.expand_path(file_name)
         output.puts("process #{file_path}")
@@ -35,8 +30,6 @@ module GenconIndex
           csv_file: file_path,
           mapfile: mapfile,
           solr_url: solr_url,
-          solr_user: solr_user,
-          solr_password: solr_password,
           batch_size: batch_size
         )
       end
@@ -54,21 +47,8 @@ module GenconIndex
       GenconIndex::HarvestCSV.blacklight(mapfile, output)
     end
 
-    def commit(solr_url: ENV.fetch("SOLR_URL", nil),
-               solr_user: ENV.fetch("SOLR_AUTH_USER", nil),
-               solr_password: ENV.fetch("SOLR_AUTH_PASSWORD", nil))
-      RSolr.connect(url: solr_url_with_auth(solr_url, solr_user, solr_password)).commit
-    end
-
-    def solr_url_with_auth(solr_url, solr_user, solr_password)
-      return solr_url if solr_url.nil? || solr_user.to_s.empty?
-
-      uri = URI.parse(solr_url)
-      return solr_url if uri.user
-
-      uri.user = solr_user
-      uri.password = solr_password
-      uri.to_s
+    def commit(solr_url: nil)
+      GenconIndex::SolrConfig.client(solr_url).commit
     end
   end
 end

@@ -75,12 +75,12 @@ RSpec.describe GenconIndex::HarvestCSV do
   describe ".harvest" do
     let(:map_path) { SPEC_FIXTURES_DIR.join("solr_map.yml") }
     let(:csv_path) { SPEC_FIXTURES_DIR.join("1980.csv") }
-    let(:solr_url) { "http://example.com/solr" }
     let(:solr_client) { instance_double(RSolr::Client) }
     let(:progress_bar) { instance_double(ProgressBar::Base) }
+    let(:solr_endpoint) { "http://localhost:8090/solr/gencon_test" }
 
     before do
-      allow(RSolr).to receive(:connect).and_return(solr_client)
+      allow(RSolr).to receive(:connect).with(url: solr_endpoint).and_return(solr_client)
       allow(solr_client).to receive(:add)
       allow(solr_client).to receive(:commit)
       allow(ProgressBar).to receive(:create).and_return(progress_bar)
@@ -95,7 +95,7 @@ RSpec.describe GenconIndex::HarvestCSV do
       end
       expect(solr_client).to receive(:commit).ordered
 
-      described_class.harvest(csv_path, map_path, solr_url, 500)
+      described_class.harvest(csv_path, map_path, 500, solr_endpoint)
 
       flattened_documents = added_batches.flatten
 
@@ -110,18 +110,31 @@ RSpec.describe GenconIndex::HarvestCSV do
       expect(progress_bar).to have_received(:increment).at_least(:once)
     end
 
+    it "uses a provided Solr client without reconnecting" do
+      described_class.harvest(csv_path, map_path, 500, solr_endpoint, solr: solr_client)
+
+      expect(RSolr).not_to have_received(:connect)
+    end
+
+    it "builds a Solr client through RSolr when one is not provided" do
+      described_class.harvest(csv_path, map_path, 500, solr_endpoint)
+
+      expect(RSolr).to have_received(:connect).with(url: solr_endpoint)
+    end
+
     it "does not create threads during harvest" do
       expect(Thread).not_to receive(:new)
 
-      described_class.harvest(csv_path, map_path, solr_url, 500)
+      described_class.harvest(csv_path, map_path, 500, solr_endpoint)
     end
 
     it "raises errors from solr.add" do
       allow(solr_client).to receive(:add).and_raise(StandardError, "add failed")
 
       expect do
-        described_class.harvest(csv_path, map_path, solr_url, 500)
+        described_class.harvest(csv_path, map_path, 500, solr_endpoint)
       end.to raise_error(StandardError, "add failed")
     end
+
   end
 end

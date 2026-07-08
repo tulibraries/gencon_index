@@ -71,7 +71,7 @@ RSpec.describe GenconIndex::App do
       ENV["GENCON_TEMP_PATH"] = "/tmp/gencon"
 
       expect(GenconIndex::CLI).to receive(:harvest_all).with(
-        directory: "/tmp/gencon",
+        directory: nil,
         pattern: "*.csv",
         mapfile: "solr_map.yml",
         solr_url: nil,
@@ -81,14 +81,14 @@ RSpec.describe GenconIndex::App do
       run_command("harvest_all")
     end
 
-    it "uses SOLR_URL for harvest_all when no CLI options are given" do
+    it "leaves Solr URL resolution for harvest_all to downstream config when no CLI options are given" do
       ENV["SOLR_URL"] = "http://localhost:8983/solr"
 
       expect(GenconIndex::CLI).to receive(:harvest_all).with(
-        directory: "./csv",
+        directory: nil,
         pattern: "*.csv",
         mapfile: "solr_map.yml",
-        solr_url: "http://localhost:8983/solr",
+        solr_url: nil,
         batch_size: 100
       )
 
@@ -122,11 +122,11 @@ RSpec.describe GenconIndex::App do
       run_command("commit", "--solr-url=http://localhost:8983/solr")
     end
 
-    it "uses SOLR_URL for commit when no CLI options are given" do
+    it "leaves Solr URL resolution for commit to downstream config when no CLI options are given" do
       ENV["SOLR_URL"] = "http://localhost:8983/solr"
 
       expect(GenconIndex::CLI).to receive(:commit).with(
-        solr_url: "http://localhost:8983/solr"
+        solr_url: nil
       )
 
       run_command("commit")

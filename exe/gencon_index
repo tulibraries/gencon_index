@@ -29,7 +29,7 @@ module GenconIndex
         GenconIndex::CLI.harvest(
           csv_file: args[0],
           mapfile: options[:mapfile],
-          solr_url: options[:solr_url] || ENV.fetch("SOLR_URL", nil),
+          solr_url: options[:solr_url],
           batch_size: options[:batch_size].to_i
         )
       end
@@ -54,10 +54,10 @@ module GenconIndex
 
       c.action do |_global_options, options, _args|
         GenconIndex::CLI.harvest_all(
-          directory: options[:directory] || ENV.fetch("GENCON_TEMP_PATH", "./csv"),
+          directory: options[:directory],
           pattern: options[:pattern],
           mapfile: options[:mapfile],
-          solr_url: options[:solr_url] || ENV.fetch("SOLR_URL", nil),
+          solr_url: options[:solr_url],
           batch_size: options[:batch_size].to_i
         )
       end
@@ -101,7 +101,7 @@ module GenconIndex
       c.flag [:solr_url]
 
       c.action do |_global_options, options, _args|
-        GenconIndex::CLI.commit(solr_url: options[:solr_url] || ENV.fetch("SOLR_URL", nil))
+        GenconIndex::CLI.commit(solr_url: options[:solr_url])
       end
     end
   end
