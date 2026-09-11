@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "csv", "~> 3.3"
   spec.add_dependency "dotenv", "~> 3.2"
   spec.add_dependency "gli", "~> 2.22"
+  spec.add_dependency "json", "~> 2.0"
   spec.add_dependency "logger", "~> 1.7"
   spec.add_dependency "rsolr", "~> 2.6"
   spec.add_dependency "ruby-progressbar", "~> 1.13"
